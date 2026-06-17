@@ -21,6 +21,7 @@ import AdminSubscriptions from "@/pages/admin/SubscriptionsPage";
 import AdminPayments from "@/pages/admin/PaymentsPage";
 import AdminComplaints from "@/pages/admin/ComplaintsPage";
 import AdminAnnouncements from "@/pages/admin/AnnouncementsPage";
+import AdminZones from "@/pages/admin/ZonesPage";
 
 // Layouts
 import { CustomerLayout } from "@/components/layouts/CustomerLayout";
@@ -83,6 +84,7 @@ function AppRouter() {
       <Route path="/admin/payments" component={() => <AdminRoute component={AdminPayments} />} />
       <Route path="/admin/complaints" component={() => <AdminRoute component={AdminComplaints} />} />
       <Route path="/admin/announcements" component={() => <AdminRoute component={AdminAnnouncements} />} />
+      <Route path="/admin/zones" component={() => <AdminRoute component={AdminZones} />} />
 
       <Route component={NotFound} />
     </Switch>

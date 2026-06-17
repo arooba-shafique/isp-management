@@ -56,7 +56,9 @@ import type {
   SuspendInput,
   SwitchPackageInput,
   User,
-  VerifyPaymentInput
+  VerifyPaymentInput,
+  Zone,
+  ZoneInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -2292,6 +2294,296 @@ export const useCreateAnnouncement = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getCreateAnnouncementMutationOptions(options));
+    }
+
+export const getListZonesUrl = () => {
+
+
+
+
+  return `/api/zones`
+}
+
+/**
+ * @summary List all zones (public)
+ */
+export const listZones = async ( options?: RequestInit): Promise<Zone[]> => {
+
+  return customFetch<Zone[]>(getListZonesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListZonesQueryKey = () => {
+    return [
+    `/api/zones`
+    ] as const;
+    }
+
+
+export const getListZonesQueryOptions = <TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listZones>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListZonesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listZones>>> = ({ signal }) => listZones({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listZones>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListZonesQueryResult = NonNullable<Awaited<ReturnType<typeof listZones>>>
+export type ListZonesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all zones (public)
+ */
+
+export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listZones>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListZonesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateZoneUrl = () => {
+
+
+
+
+  return `/api/zones`
+}
+
+/**
+ * @summary Admin creates a zone
+ */
+export const createZone = async (zoneInput: ZoneInput, options?: RequestInit): Promise<Zone> => {
+
+  return customFetch<Zone>(getCreateZoneUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      zoneInput,)
+  }
+);}
+
+
+
+
+export const getCreateZoneMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createZone>>, TError,{data: BodyType<ZoneInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createZone>>, TError,{data: BodyType<ZoneInput>}, TContext> => {
+
+const mutationKey = ['createZone'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createZone>>, {data: BodyType<ZoneInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createZone(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateZoneMutationResult = NonNullable<Awaited<ReturnType<typeof createZone>>>
+    export type CreateZoneMutationBody = BodyType<ZoneInput>
+    export type CreateZoneMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin creates a zone
+ */
+export const useCreateZone = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createZone>>, TError,{data: BodyType<ZoneInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createZone>>,
+        TError,
+        {data: BodyType<ZoneInput>},
+        TContext
+      > => {
+      return useMutation(getCreateZoneMutationOptions(options));
+    }
+
+export const getUpdateZoneUrl = (id: number,) => {
+
+
+
+
+  return `/api/zones/${id}`
+}
+
+/**
+ * @summary Admin updates a zone
+ */
+export const updateZone = async (id: number,
+    zoneInput: ZoneInput, options?: RequestInit): Promise<Zone> => {
+
+  return customFetch<Zone>(getUpdateZoneUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      zoneInput,)
+  }
+);}
+
+
+
+
+export const getUpdateZoneMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateZone>>, TError,{id: number;data: BodyType<ZoneInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateZone>>, TError,{id: number;data: BodyType<ZoneInput>}, TContext> => {
+
+const mutationKey = ['updateZone'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateZone>>, {id: number;data: BodyType<ZoneInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateZone(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateZoneMutationResult = NonNullable<Awaited<ReturnType<typeof updateZone>>>
+    export type UpdateZoneMutationBody = BodyType<ZoneInput>
+    export type UpdateZoneMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin updates a zone
+ */
+export const useUpdateZone = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateZone>>, TError,{id: number;data: BodyType<ZoneInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateZone>>,
+        TError,
+        {id: number;data: BodyType<ZoneInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateZoneMutationOptions(options));
+    }
+
+export const getDeleteZoneUrl = (id: number,) => {
+
+
+
+
+  return `/api/zones/${id}`
+}
+
+/**
+ * @summary Admin deletes a zone
+ */
+export const deleteZone = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteZoneUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteZoneMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteZone>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteZone>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteZone'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteZone>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteZone(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteZoneMutationResult = NonNullable<Awaited<ReturnType<typeof deleteZone>>>
+
+    export type DeleteZoneMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin deletes a zone
+ */
+export const useDeleteZone = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteZone>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteZone>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteZoneMutationOptions(options));
     }
 
 export const getGetDashboardStatsUrl = () => {

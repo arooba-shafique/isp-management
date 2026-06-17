@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Users, Package, CreditCard, MessageSquare,
-  Megaphone, LogOut, Wifi, ChevronRight, BarChart3, Menu, X
+  Megaphone, LogOut, Wifi, MapPin, Menu, X
 } from "lucide-react";
 import { useState } from "react";
 
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/admin/payments", label: "Payments", icon: CreditCard },
   { href: "/admin/complaints", label: "Complaints", icon: MessageSquare },
   { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
+  { href: "/admin/zones", label: "Zones", icon: MapPin },
 ];
 
 function NavLink({ href, label, Icon, onClick }: { href: string; label: string; Icon: typeof LayoutDashboard; onClick?: () => void }) {

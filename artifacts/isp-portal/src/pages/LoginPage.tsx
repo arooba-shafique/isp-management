@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSendOtp, useLogin, useRegister, useClaimAccount } from "@workspace/api-client-react";
+import { useSendOtp, useLogin, useRegister, useClaimAccount, useListZones, getListZonesQueryKey } from "@workspace/api-client-react";
 import { Wifi, Phone, KeyRound, User, MapPin } from "lucide-react";
 
 type Step = "phone" | "otp" | "register" | "claim";
@@ -24,6 +24,7 @@ export default function LoginPage() {
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const claimMutation = useClaimAccount();
+  const { data: zones = [] } = useListZones({ query: { queryKey: getListZonesQueryKey() } });
 
   const isLoading = sendOtp.isPending || loginMutation.isPending || registerMutation.isPending || claimMutation.isPending;
 
@@ -185,7 +186,12 @@ export default function LoginPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Zone <span className="text-muted-foreground font-normal">(optional)</span></label>
-                <input type="text" value={zone} onChange={e => setZone(e.target.value)} placeholder="e.g. Zone A, Sahiwal City" className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" disabled={isLoading} />
+                <select value={zone} onChange={e => setZone(e.target.value)} className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white" disabled={isLoading}>
+                  <option value="">Select your zone…</option>
+                  {(zones as Array<{ id: number; name: string }>).map(z => (
+                    <option key={z.id} value={z.name}>{z.name}</option>
+                  ))}
+                </select>
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">

@@ -16,6 +16,7 @@ tags:
   - name: complaints
   - name: announcements
   - name: dashboard
+  - name: zones
 
 paths:
   /healthz:
@@ -631,6 +632,83 @@ paths:
               schema:
                 $ref: "#/components/schemas/Announcement"
 
+  # ── ZONES ────────────────────────────────────────────────────────────────
+  /zones:
+    get:
+      operationId: listZones
+      tags: [zones]
+      summary: List all zones (public)
+      responses:
+        "200":
+          description: List of zones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Zone"
+    post:
+      operationId: createZone
+      tags: [zones]
+      summary: Admin creates a zone
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ZoneInput"
+      responses:
+        "201":
+          description: Zone created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Zone"
+
+  /zones/{id}:
+    patch:
+      operationId: updateZone
+      tags: [zones]
+      summary: Admin updates a zone
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ZoneInput"
+      responses:
+        "200":
+          description: Zone updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Zone"
+    delete:
+      operationId: deleteZone
+      tags: [zones]
+      summary: Admin deletes a zone
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   # ── DASHBOARD ────────────────────────────────────────────────────────────
   /dashboard/stats:
     get:
@@ -1175,6 +1253,28 @@ components:
           type: string
         daysLeft:
           type: ["integer", "null"]
+
+    Zone:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ZoneInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
 
     PackageDistribution:
       type: object

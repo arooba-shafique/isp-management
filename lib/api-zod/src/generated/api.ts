@@ -634,6 +634,55 @@ export const CreateAnnouncementBody = zod.object({
 
 
 /**
+ * @summary List all zones (public)
+ */
+export const ListZonesResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListZonesResponse = zod.array(ListZonesResponseItem)
+
+
+/**
+ * @summary Admin creates a zone
+ */
+export const CreateZoneBody = zod.object({
+  "name": zod.string(),
+  "description": zod.string().optional()
+})
+
+
+/**
+ * @summary Admin updates a zone
+ */
+export const UpdateZoneParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateZoneBody = zod.object({
+  "name": zod.string(),
+  "description": zod.string().optional()
+})
+
+export const UpdateZoneResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Admin deletes a zone
+ */
+export const DeleteZoneParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
  * @summary Admin dashboard overview stats
  */
 export const GetDashboardStatsResponse = zod.object({

@@ -55,3 +55,5 @@ export * from './userRole';
 export * from './userStatus';
 export * from './verifyPaymentInput';
 export * from './verifyPaymentInputAction';
+export * from './zone';
+export * from './zoneInput';

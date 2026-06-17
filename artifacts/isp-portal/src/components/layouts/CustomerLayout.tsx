@@ -1,13 +1,12 @@
 import { Link, useRoute, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Package, CreditCard, MessageSquare, LogOut, Wifi, Menu, X, User } from "lucide-react";
+import { LayoutDashboard, Package, MessageSquare, LogOut, Wifi, Menu, X, User } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/packages", label: "Packages", icon: Package },
-  { href: "/payments", label: "Payments", icon: CreditCard },
   { href: "/complaints", label: "Support", icon: MessageSquare },
 ];
 
@@ -76,12 +75,10 @@ export function CustomerLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Desktop sidebar */}
       <div className="hidden md:flex w-56 flex-col border-r bg-card flex-shrink-0">
         <SidebarContent />
       </div>
 
-      {/* Mobile sidebar overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
@@ -95,7 +92,6 @@ export function CustomerLayout({ children }: { children: React.ReactNode }) {
       )}
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Mobile header */}
         <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b bg-card">
           <button onClick={() => setMobileOpen(true)}>
             <Menu size={20} />

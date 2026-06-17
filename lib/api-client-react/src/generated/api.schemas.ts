@@ -384,6 +384,19 @@ export interface ExpiringCustomer {
   daysLeft?: number | null;
 }
 
+export interface Zone {
+  id: number;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  createdAt: string;
+}
+
+export interface ZoneInput {
+  name: string;
+  description?: string;
+}
+
 export interface PackageDistribution {
   packageName: string;
   customerCount: number;

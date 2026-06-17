@@ -24,8 +24,10 @@ router.post("/announcements", requireAdmin, async (req, res): Promise<void> => {
     title, message, targetZone: targetZone ?? null, recipientCount
   }).returning();
 
+  const fullMsg = `${title}: ${message}`;
   for (const cust of customers) {
-    await sendSms(cust.phone, `${title}: ${message}`).catch(() => {});
+    await sendSms(cust.phone, fullMsg).catch(() => {});
+    await sendWhatsApp(cust.phone, fullMsg).catch(() => {});
   }
 
   res.status(201).json({ ...announcement, createdAt: announcement.createdAt.toISOString() });
