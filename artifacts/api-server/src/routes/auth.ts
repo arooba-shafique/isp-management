@@ -8,7 +8,7 @@ import { sendOtpNotification } from "../lib/notifications";
 const router: IRouter = Router();
 
 router.post("/auth/send-otp", async (req, res): Promise<void> => {
-  const { phone } = req.body;
+  const phone: string = (req.body.phone ?? "").trim();
   if (!phone) { res.status(400).json({ error: "Phone required" }); return; }
 
   const otp = generateOtp();
@@ -22,7 +22,8 @@ router.post("/auth/send-otp", async (req, res): Promise<void> => {
 });
 
 router.post("/auth/register", async (req, res): Promise<void> => {
-  const { phone, otp, name, password, address, zone } = req.body;
+  const phone: string = (req.body.phone ?? "").trim();
+  const { otp, name, password, address, zone } = req.body;
   if (!phone || !otp || !name || !password) {
     res.status(400).json({ error: "phone, otp, name, password required" }); return;
   }
@@ -53,7 +54,8 @@ router.post("/auth/register", async (req, res): Promise<void> => {
 });
 
 router.post("/auth/login", async (req, res): Promise<void> => {
-  const { phone, otp } = req.body;
+  const phone: string = (req.body.phone ?? "").trim();
+  const { otp } = req.body;
   if (!phone || !otp) { res.status(400).json({ error: "phone and otp required" }); return; }
 
   // Validate OTP first — before revealing whether the phone is registered
@@ -82,7 +84,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
 });
 
 router.post("/auth/claim-account", async (req, res): Promise<void> => {
-  const { phone, otp, password } = req.body;
+  const phone: string = (req.body.phone ?? "").trim();
+  const { otp, password } = req.body;
   if (!phone || !otp || !password) { res.status(400).json({ error: "phone, otp, password required" }); return; }
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.phone, phone));
