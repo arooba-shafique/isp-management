@@ -56,15 +56,25 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   const { phone, otp } = req.body;
   if (!phone || !otp) { res.status(400).json({ error: "phone and otp required" }); return; }
 
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.phone, phone));
-  if (!user) { res.status(404).json({ error: "Phone not registered" }); return; }
-  if (user.status === "suspended") { res.status(403).json({ error: "Account suspended" }); return; }
-
+  // Validate OTP first — before revealing whether the phone is registered
   const validOtp = await db.select().from(otpCodesTable).where(
     and(eq(otpCodesTable.phone, phone), eq(otpCodesTable.code, otp), eq(otpCodesTable.used, false), gt(otpCodesTable.expiresAt, new Date()))
   );
   if (!validOtp.length) { res.status(400).json({ error: "Invalid or expired OTP" }); return; }
 
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.phone, phone));
+
+  if (!user) {
+    // Valid OTP, phone not registered — don't consume it so register step can use it
+    res.status(404).json({ error: "Phone not registered" }); return;
+  }
+  if (user.status === "suspended") { res.status(403).json({ error: "Account suspended" }); return; }
+  if (user.status === "pending-claim") {
+    // Valid OTP, pending-claim — don't consume it so claim step can use it
+    res.status(403).json({ error: "Account pending claim — please set your password first" }); return;
+  }
+
+  // Successful login — mark OTP used now
   await db.update(otpCodesTable).set({ used: true }).where(eq(otpCodesTable.id, validOtp[0].id));
 
   const token = signToken({ userId: user.id, role: user.role });
