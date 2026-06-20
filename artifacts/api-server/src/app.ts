@@ -28,7 +28,18 @@ app.use(
   }),
 );
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://isp-management-isp-portal.vercel.app",
+      "http://localhost:5173",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", router);
