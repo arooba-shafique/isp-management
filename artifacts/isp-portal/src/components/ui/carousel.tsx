@@ -105,9 +105,7 @@ const Carousel = React.forwardRef<
     }, [api, setApi])
 
     React.useEffect(() => {
-      if (!api) {
-        return
-      }
+      if (!api) return;
 
       onSelect(api)
       api.on("reInit", onSelect)

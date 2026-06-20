@@ -9,7 +9,7 @@ export default function CustomerDetailPage() {
   const [, params] = useRoute("/admin/customers/:id");
   const [, navigate] = useLocation();
   const qc = useQueryClient();
-  const id = params ? Number(params.id) : 0;
+  const id = Number((params as any)?.id ?? 0);
 
   const { data: customer, isLoading } = useGetCustomer(id, { query: { queryKey: getGetCustomerQueryKey(id), enabled: !!id } });
   const { data: subscriptions = [] } = useListSubscriptions({ customerId: id }, { query: { queryKey: ["subs", id] } });
