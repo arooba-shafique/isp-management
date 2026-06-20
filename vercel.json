@@ -1,12 +1,9 @@
 {
-  "buildCommand": "pnpm run build",
-  "outputDirectory": "dist/public",
-  "framework": null,
+  "version": 2,
+  "buildCommand": "pnpm --filter @workspace/isp-portal run build",
+  "outputDirectory": "artifacts/isp-portal/dist/public",
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.ts" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "env": {
-    "PORT": "3000",
-    "BASE_PATH": "/"
-  }
+  ]
 }
