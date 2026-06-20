@@ -54,7 +54,7 @@ export default function LoginPage() {
     setError("");
     if (!password.trim()) { setError("Please enter your password"); return; }
     try {
-      const result = await loginMutation.mutateAsync({ data: { phone, password } });
+      const result = await loginMutation.mutateAsync({ data: { phone, otp: password } } as any);
       login(result.token);
       navigate("/admin/dashboard");
     } catch (err: unknown) {
