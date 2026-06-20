@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd artifacts/isp-portal && pnpm install && pnpm run build",
+  "outputDirectory": "artifacts/isp-portal/dist/public",
+  "framework": null,
+  "env": {
+    "PORT": "3000",
+    "BASE_PATH": "/"
+  }
+}
