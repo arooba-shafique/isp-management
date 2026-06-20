@@ -96,14 +96,6 @@ const Carousel = React.forwardRef<
       [scrollPrev, scrollNext]
     )
 
-    React.useEffect((): void => {
-      if (!api || !setApi) {
-        return
-      }
-
-      setApi(api)
-    }, [api, setApi])
-
     React.useEffect(() => {
       if (!api || !setApi) {
         return
@@ -113,14 +105,15 @@ const Carousel = React.forwardRef<
     }, [api, setApi])
 
     React.useEffect(() => {
-      if (!api) return;
-
-      onSelect(api)
-      api.on("reInit", onSelect)
-      api.on("select", onSelect)
-      return () => { 
-        api.off("reInit", onSelect)
-        api.off("select", onSelect) 
+      if (api) {
+        onSelect(api)
+        api.on("reInit", onSelect)
+        api.on("select", onSelect)
+        
+        return () => {
+          api.off("reInit", onSelect)
+          api.off("select", onSelect)
+        }
       }
     }, [api, onSelect])
 
