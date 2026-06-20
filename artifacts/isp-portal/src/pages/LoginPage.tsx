@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSendOtp, useLogin, useRegister, useClaimAccount, useListZones, getListZonesQueryKey } from "@workspace/api-client-react";
-import { Wifi, Phone, KeyRound, User, MapPin } from "lucide-react";
+import { Wifi, Phone, KeyRound, User, MapPin, Lock } from "lucide-react";
 
-type Step = "phone" | "otp" | "register" | "claim";
+const ADMIN_PHONE = "03496641464";
+
+type Step = "phone" | "otp" | "admin-password" | "register" | "claim";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -32,16 +34,32 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     if (!phone.trim()) { setError("Please enter your phone number"); return; }
+    if (phone.trim() === ADMIN_PHONE) {
+      setStep("admin-password");
+      return;
+    }
     try {
       const resp = await sendOtp.mutateAsync({ data: { phone } });
       const msg = (resp as { message?: string })?.message ?? "";
-      if (msg.includes("not registered")) {
-        setIsNewUser(true);
-      }
+      if (msg.includes("not registered")) setIsNewUser(true);
       setStep("otp");
     } catch (err: unknown) {
       const e = err as { data?: { error?: string }; message?: string };
       setError(e?.data?.error ?? e?.message ?? "Failed to send OTP");
+    }
+  }
+
+  async function handleAdminLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    if (!password.trim()) { setError("Please enter your password"); return; }
+    try {
+      const result = await loginMutation.mutateAsync({ data: { phone, password } });
+      login(result.token);
+      navigate("/admin/dashboard");
+    } catch (err: unknown) {
+      const e = err as { data?: { error?: string }; message?: string };
+      setError(e?.data?.error ?? e?.message ?? "Invalid password");
     }
   }
 
@@ -55,10 +73,7 @@ export default function LoginPage() {
       navigate(result.user.role === "admin" ? "/admin/dashboard" : "/dashboard");
     } catch (err: unknown) {
       const e = err as { status?: number; data?: { error?: string }; message?: string };
-      if (e?.status === 404) {
-        setStep("register");
-        return;
-      }
+      if (e?.status === 404) { setStep("register"); return; }
       const msg = e?.data?.error ?? e?.message ?? "";
       if (msg.toLowerCase().includes("pending-claim") || msg.toLowerCase().includes("pending claim")) {
         setNeedsClaim(true);
@@ -98,7 +113,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-sidebar flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary mb-4">
             <Wifi size={28} className="text-white" />
@@ -112,7 +126,7 @@ export default function LoginPage() {
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
                 <h2 className="text-lg font-semibold mb-1">Sign In</h2>
-                <p className="text-sm text-muted-foreground">Enter your phone number to receive an OTP</p>
+                <p className="text-sm text-muted-foreground">Enter your phone number to continue</p>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Phone Number</label>
@@ -127,9 +141,36 @@ export default function LoginPage() {
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                {isLoading ? "Sending..." : "Send OTP"}
+                Continue
               </button>
               <p className="text-xs text-center text-muted-foreground">New users will be registered automatically</p>
+            </form>
+          )}
+
+          {step === "admin-password" && (
+            <form onSubmit={handleAdminLogin} className="space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold mb-1">Admin Login</h2>
+                <p className="text-sm text-muted-foreground">Enter your admin password</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Password</label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="password" value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="Enter password" className="w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+                {isLoading ? "Signing in..." : "Sign In"}
+              </button>
+              <button type="button" onClick={() => { setStep("phone"); setError(""); setPassword(""); }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Change phone number
+              </button>
             </form>
           )}
 
