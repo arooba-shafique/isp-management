@@ -1,9 +1,10 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import * as pg from 'pg';
+import pkg from 'pg';
+const { Pool } = pkg;
 
 import * as schema from "./schema";
 
-const { Pool } = pg;
+
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
