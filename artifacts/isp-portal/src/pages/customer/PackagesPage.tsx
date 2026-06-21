@@ -3,7 +3,7 @@ import {
   useListPackages, useCreateSubscription, useListSubscriptions, useSwitchPackage,
   useSubmitPayment, getListSubscriptionsQueryKey, getListPackagesQueryKey, getListPaymentsQueryKey,
 } from "@workspace/api-client-react";
-import { Wifi, Zap, Calendar, CheckCircle, X, Smartphone, Building2, CreditCard } from "lucide-react";
+import { Wifi, Zap, Calendar, CheckCircle, X, Smartphone, Building2, CreditCard, Hash } from "lucide-react";
 import { useState } from "react";
 
 const PAYMENT_METHODS = [
@@ -52,6 +52,7 @@ export default function CustomerPackages() {
   const [dialogPkg, setDialogPkg] = useState<Pkg | null>(null);
   const [payMethod, setPayMethod] = useState("jazzcash");
   const [amount, setAmount] = useState("");
+  const [transactionId, setTransactionId] = useState("");
   const [proofUrl, setProofUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -67,12 +68,17 @@ export default function CustomerPackages() {
     setDialogPkg(pkg);
     setPayMethod("jazzcash");
     setAmount(String(pkg.price));
+    setTransactionId("");
     setProofUrl("");
     setError("");
   }
 
   async function handleConfirmPayment() {
     if (!dialogPkg) return;
+    if (!transactionId.trim()) {
+      setError("Transaction ID is required");
+      return;
+    }
     setSubmitting(true);
     setError("");
     try {
@@ -89,7 +95,8 @@ export default function CustomerPackages() {
           subscriptionId: subId,
           amount: Number(amount) || dialogPkg.price,
           proofImageUrl: proofUrl || undefined,
-        },
+          transactionId: transactionId.trim(),
+        } as any,
       });
       await Promise.all([
         qc.invalidateQueries({ queryKey: getListSubscriptionsQueryKey() }),
@@ -241,7 +248,7 @@ export default function CustomerPackages() {
                 <p className="text-xs text-muted-foreground mt-2">After sending, fill in the details below.</p>
               </div>
 
-              {/* Step 3: amount + proof */}
+              {/* Step 3: amount + transaction ID + proof */}
               <div className="space-y-3">
                 <p className="text-sm font-semibold">2. Confirm details</p>
                 <div>
@@ -256,6 +263,22 @@ export default function CustomerPackages() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium mb-1 text-muted-foreground">
+                    Transaction ID <span className="text-destructive">*</span>
+                  </label>
+                  <div className="relative">
+                    <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={transactionId}
+                      onChange={e => setTransactionId(e.target.value)}
+                      className="w-full pl-8 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                      placeholder="e.g. TXN123456789"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Enter the transaction/reference ID from your payment receipt.</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium mb-1 text-muted-foreground">
                     Screenshot URL <span className="font-normal">(optional)</span>
                   </label>
                   <input
@@ -265,7 +288,6 @@ export default function CustomerPackages() {
                     className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                     placeholder="Paste image link from WhatsApp / Google Photos…"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Take a screenshot of your transfer receipt and paste the link here.</p>
                 </div>
               </div>
 
