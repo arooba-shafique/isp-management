@@ -3,7 +3,7 @@
   "buildCommand": "pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/isp-portal run build",
   "outputDirectory": "artifacts/isp-portal/dist/public",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/api/(.*)", "destination": "/api/index.mjs" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
