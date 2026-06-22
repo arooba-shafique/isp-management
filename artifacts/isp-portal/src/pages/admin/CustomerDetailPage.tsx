@@ -163,10 +163,22 @@ export default function CustomerDetailPage() {
         </div>
       )}
 
-     {editing && (
+   {editing && (
         <div className="bg-white border rounded-xl p-5 shadow-sm">
-          <h2 className="font-semibold mb-4">Assign Zone</h2>
-          <div className="space-y-3">
+          <h2 className="font-semibold mb-4">Edit Customer</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Name</label>
+              <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Phone</label>
+              <input type="text" value={editPhone} onChange={e => setEditPhone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Address</label>
+              <input type="text" value={editAddress} onChange={e => handleAddressChange(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
             <div>
               <label className="block text-sm font-medium mb-1.5">Zone</label>
               <select value={editZone} onChange={e => setEditZone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
@@ -185,13 +197,12 @@ export default function CustomerDetailPage() {
           {error && <p className="text-sm text-destructive mt-3">{error}</p>}
           <div className="flex gap-2 mt-4">
             <button onClick={saveEdit} disabled={updateCustomer.isPending} className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-primary/90 transition-colors">
-              {updateCustomer.isPending ? "Saving..." : "Save Zone"}
+              {updateCustomer.isPending ? "Saving..." : "Save Changes"}
             </button>
             <button onClick={() => setEditing(false)} className="border px-4 py-2 rounded-lg text-sm hover:bg-accent transition-colors">Cancel</button>
           </div>
         </div>
       )}
-
       {/* Info Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white border rounded-xl p-4 shadow-sm flex items-center gap-3">
