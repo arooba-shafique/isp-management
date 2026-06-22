@@ -17,12 +17,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [zone, setZone] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [needsClaim, setNeedsClaim] = useState(false);
-
-  const { data: zones = [] } = useListZones({ query: { queryKey: getListZonesQueryKey() } });
 
   async function handleCheckPhone(e: React.FormEvent) {
     e.preventDefault();
