@@ -69,7 +69,7 @@ export default function CustomerDetailPage() {
     setCancelLoading(true);
     setCancelError("");
     try {
-      const token = localStorage.getItem("token") ?? sessionStorage.getItem("token") ?? "";
+      const token = localStorage.getItem("isp_token") ?? "";
       const res = await fetch(`${API_BASE}/api/subscriptions/${activeSub.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
