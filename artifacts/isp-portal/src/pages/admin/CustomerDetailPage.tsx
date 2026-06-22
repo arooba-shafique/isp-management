@@ -1,8 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
-import { useGetCustomer, useUpdateCustomer, useSuspendCustomer, useListSubscriptions, useListPayments, useListComplaints, getGetCustomerQueryKey, getListCustomersQueryKey } from "@workspace/api-client-react";
+import { useGetCustomer, useUpdateCustomer, useSuspendCustomer, useListSubscriptions, useListPayments, useListComplaints, useListPackages, useSwitchPackage, useCreateSubscription, getGetCustomerQueryKey, getListCustomersQueryKey, getListPackagesQueryKey } from "@workspace/api-client-react";
 import { StatusBadge } from "@/components/StatusBadge";
-import { ArrowLeft, Edit, Ban, CheckCircle, Phone, MapPin, Calendar, Wifi } from "lucide-react";
+import { ArrowLeft, Edit, Ban, CheckCircle, Phone, MapPin, Calendar, Wifi, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 export default function CustomerDetailPage() {
@@ -15,9 +15,12 @@ export default function CustomerDetailPage() {
   const { data: subscriptions = [] } = useListSubscriptions({ customerId: id }, { query: { queryKey: ["subs", id] } });
   const { data: payments = [] } = useListPayments({ customerId: id }, { query: { queryKey: ["payments", id] } });
   const { data: complaints = [] } = useListComplaints({ customerId: id }, { query: { queryKey: ["complaints", id] } });
+  const { data: packages = [] } = useListPackages({ query: { queryKey: getListPackagesQueryKey() } });
 
   const updateCustomer = useUpdateCustomer();
   const suspendCustomer = useSuspendCustomer();
+  const switchPkg = useSwitchPackage();
+  const createSub = useCreateSubscription();
 
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
@@ -25,6 +28,12 @@ export default function CustomerDetailPage() {
   const [editAddress, setEditAddress] = useState("");
   const [editZone, setEditZone] = useState("");
   const [error, setError] = useState("");
+
+  const [switchingPkg, setSwitchingPkg] = useState(false);
+  const [selectedPkgId, setSelectedPkgId] = useState("");
+  const [switchLoading, setSwitchLoading] = useState(false);
+  const [switchError, setSwitchError] = useState("");
+  const [switchSuccess, setSwitchSuccess] = useState(false);
 
   function startEdit() {
     if (!customer) return;
@@ -56,10 +65,36 @@ export default function CustomerDetailPage() {
     await qc.invalidateQueries({ queryKey: getListCustomersQueryKey() });
   }
 
+  async function handleSwitchPackage() {
+    if (!selectedPkgId) { setSwitchError("Please select a package"); return; }
+    setSwitchLoading(true);
+    setSwitchError("");
+    try {
+      const activeSub = (subscriptions as Array<{ id: number; status: string }>).find(s => s.status === "active");
+      if (activeSub) {
+        await switchPkg.mutateAsync({ id: activeSub.id, data: { newPackageId: Number(selectedPkgId) } });
+      } else {
+        await createSub.mutateAsync({ data: { packageId: Number(selectedPkgId), customerId: id } } as any);
+      }
+      await qc.invalidateQueries({ queryKey: getGetCustomerQueryKey(id) });
+      await qc.invalidateQueries({ queryKey: ["subs", id] });
+      setSwitchSuccess(true);
+      setSwitchingPkg(false);
+      setSelectedPkgId("");
+      setTimeout(() => setSwitchSuccess(false), 3000);
+    } catch (e: unknown) {
+      const err = e as { data?: { error?: string }; message?: string };
+      setSwitchError(err?.data?.error ?? err?.message ?? "Failed to switch package");
+    } finally {
+      setSwitchLoading(false);
+    }
+  }
+
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   if (!customer) return <div className="text-center py-12 text-muted-foreground">Customer not found</div>;
 
   const c = customer as { id: number; name: string; phone: string; status: string; zone?: string | null; address?: string | null; createdAt: string; activeSubscription?: { id: number; status: string; startDate?: string | null; endDate?: string | null; package?: { name?: string; speedMbps?: number; price?: number } | null } | null };
+  const activePackages = (packages as Array<{ id: number; name: string; speedMbps: number; price: number; isActive: boolean }>).filter(p => p.isActive);
 
   return (
     <div className="space-y-5 max-w-3xl">
@@ -130,10 +165,56 @@ export default function CustomerDetailPage() {
 
       {/* Active Subscription */}
       <div className="bg-white border rounded-xl p-5 shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <Wifi size={16} className="text-primary" />
-          <h2 className="font-semibold">Active Subscription</h2>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Wifi size={16} className="text-primary" />
+            <h2 className="font-semibold">Active Subscription</h2>
+          </div>
+          <button
+            onClick={() => { setSwitchingPkg(!switchingPkg); setSwitchError(""); setSelectedPkgId(""); }}
+            className="flex items-center gap-1.5 border px-3 py-1.5 rounded-lg text-sm hover:bg-accent transition-colors"
+          >
+            <RefreshCw size={14} /> Switch Package
+          </button>
         </div>
+
+        {switchSuccess && (
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg px-3 py-2 text-sm mb-3">
+            <CheckCircle size={14} /> Package switched successfully!
+          </div>
+        )}
+
+        {switchingPkg && (
+          <div className="bg-muted/50 rounded-xl p-4 mb-4 space-y-3">
+            <p className="text-sm font-medium">Select new package:</p>
+            <select
+              value={selectedPkgId}
+              onChange={e => setSelectedPkgId(e.target.value)}
+              className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+            >
+              <option value="">Choose a package…</option>
+              {activePackages.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} — {p.speedMbps} Mbps — Rs. {Number(p.price).toLocaleString()}
+                </option>
+              ))}
+            </select>
+            {switchError && <p className="text-sm text-destructive">{switchError}</p>}
+            <div className="flex gap-2">
+              <button
+                onClick={handleSwitchPackage}
+                disabled={switchLoading}
+                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-primary/90 transition-colors"
+              >
+                {switchLoading ? "Switching..." : "Confirm Switch"}
+              </button>
+              <button onClick={() => setSwitchingPkg(false)} className="border px-4 py-2 rounded-lg text-sm hover:bg-accent transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         {c.activeSubscription ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
