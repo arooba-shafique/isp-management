@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
-import { useListZones, getListZonesQueryKey } from "@workspace/api-client-react";
+import { } from "@workspace/api-client-react";
 import { Wifi, Phone, User, MapPin, Lock } from "lucide-react";
 
 const ADMIN_PHONES = ["03496641464", "03286687112"];
@@ -82,7 +82,7 @@ export default function LoginPage() {
       const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phone.trim(), name, password, address, zone }),
+        body: JSON.stringify({ phone: phone.trim(), name, password, address }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Registration failed"); return; }
