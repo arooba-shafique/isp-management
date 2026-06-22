@@ -41,9 +41,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   function handleLogout() {
+  if (window.confirm("Are you sure you want to sign out?")) {
     logout();
     navigate("/login");
   }
+}
 
   const Sidebar = ({ onNav }: { onNav?: () => void }) => (
     <div className="flex flex-col h-full">
