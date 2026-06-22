@@ -15,7 +15,8 @@ export default function CustomerDashboard() {
   const { data: payments = [] } = useListPayments(undefined, { query: { queryKey: ["payments", "customer"] } });
   const { data: complaints = [] } = useListComplaints(undefined, { query: { queryKey: ["complaints", "customer"] } });
 
-  const activeSub = subscriptions.find((s: { status: string }) => s.status === "active") ?? subscriptions[0];
+  const activeSub = subscriptions.find((s: { status: string }) => s.status === "active") ?? 
+  subscriptions.find((s: { status: string }) => s.status === "pending-payment");
   const recentPayments = [...payments].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
   if (subsLoading) return (
