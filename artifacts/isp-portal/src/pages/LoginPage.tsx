@@ -200,7 +200,7 @@ export default function LoginPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5">Address <span className="text-muted-foreground font-normal">(optional)</span></label>
+                <label className="block text-sm font-medium mb-1.5">Address <span className="text-destructive">*</span></label>
                 <div className="relative">
                   <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input type="text" value={address} onChange={e => setAddress(e.target.value)} placeholder="Street / Mohalla"
