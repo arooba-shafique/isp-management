@@ -62,20 +62,7 @@ export default function CustomerDashboard() {
                 Payment pending verification for <strong>{(activeSub as { package?: { name?: string } }).package?.name ?? "this package"}</strong>. Please wait for admin approval.
               </div>
             )}
-            {activeSub.status === "active" && (
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <Link href="/payments">
-                  <button className="w-full bg-primary text-primary-foreground py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
-                    Submit Payment
-                  </button>
-                </Link>
-                <Link href="/packages">
-                  <button className="w-full border py-2 rounded-lg text-sm font-medium hover:bg-accent transition-colors">
-                    Switch Package
-                  </button>
-                </Link>
-              </div>
-            )}
+        
           </div>
         ) : (
           <div className="text-center py-6">
