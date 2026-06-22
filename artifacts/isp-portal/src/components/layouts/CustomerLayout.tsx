@@ -33,9 +33,11 @@ export function CustomerLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   function handleLogout() {
+  if (window.confirm("Are you sure you want to sign out?")) {
     logout();
     navigate("/login");
   }
+}
 
   const SidebarContent = ({ onNav }: { onNav?: () => void }) => (
     <div className="flex flex-col h-full">
