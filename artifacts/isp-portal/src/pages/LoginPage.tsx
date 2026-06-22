@@ -76,7 +76,7 @@ export default function LoginPage() {
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!name.trim() || !password.trim()) { setError("Name and password required"); return; }
+    if (!name.trim() || !password.trim() || !address.trim()) { setError("Name, password and address are required"); return; }
     setIsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/auth/register`, {
