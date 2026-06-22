@@ -1,11 +1,21 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
-import { useGetCustomer, useUpdateCustomer, useSuspendCustomer, useListSubscriptions, useListPayments, useListComplaints, getGetCustomerQueryKey, getListCustomersQueryKey } from "@workspace/api-client-react";
+import { useGetCustomer, useUpdateCustomer, useSuspendCustomer, useListSubscriptions, useListPayments, useListComplaints, useListZones, getGetCustomerQueryKey, getListCustomersQueryKey, getListZonesQueryKey } from "@workspace/api-client-react";
 import { StatusBadge } from "@/components/StatusBadge";
-import { ArrowLeft, Edit, Ban, CheckCircle, MapPin, Calendar, Wifi, XCircle } from "lucide-react";
+import { ArrowLeft, Edit, Ban, CheckCircle, MapPin, Calendar, Wifi, XCircle, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
+
+function suggestZone(address: string, zones: Array<{ id: number; name: string; description?: string | null }>): { id: number; name: string } | null {
+  if (!address.trim()) return null;
+  const lower = address.toLowerCase();
+  for (const zone of zones) {
+    const keywords = ((zone.description ?? "") + " " + zone.name).toLowerCase().split(/[\s,،]+/);
+    if (keywords.some(k => k.length > 2 && lower.includes(k))) return zone;
+  }
+  return null;
+}
 
 export default function CustomerDetailPage() {
   const [, params] = useRoute("/admin/customers/:id");
@@ -17,6 +27,7 @@ export default function CustomerDetailPage() {
   const { data: subscriptions = [] } = useListSubscriptions({ customerId: id }, { query: { queryKey: ["subs", id] } });
   const { data: payments = [] } = useListPayments({ customerId: id }, { query: { queryKey: ["payments", id] } });
   const { data: complaints = [] } = useListComplaints({ customerId: id }, { query: { queryKey: ["complaints", id] } });
+  const { data: zones = [] } = useListZones({ query: { queryKey: getListZonesQueryKey() } });
 
   const updateCustomer = useUpdateCustomer();
   const suspendCustomer = useSuspendCustomer();
@@ -39,6 +50,14 @@ export default function CustomerDetailPage() {
     setEditName(c.name); setEditPhone(c.phone);
     setEditAddress(c.address ?? ""); setEditZone(c.zone ?? "");
     setEditing(true);
+  }
+
+  function handleAddressChange(val: string) {
+    setEditAddress(val);
+    if (!editZone) {
+      const suggested = suggestZone(val, zones as Array<{ id: number; name: string; description?: string | null }>);
+      if (suggested) setEditZone(suggested.name);
+    }
   }
 
   async function saveEdit() {
@@ -98,6 +117,10 @@ export default function CustomerDetailPage() {
   const c = customer as { id: number; name: string; phone: string; status: string; zone?: string | null; address?: string | null; createdAt: string; activeSubscription?: { id: number; status: string; startDate?: string | null; endDate?: string | null; package?: { name?: string; speedMbps?: number; price?: number } | null } | null };
   const allSubs = subscriptions as Array<{ id: number; status: string; startDate?: string | null; endDate?: string | null; package?: { name?: string; speedMbps?: number; price?: number } | null }>;
 
+  const suggestedZone = !c.zone && c.address
+    ? suggestZone(c.address, zones as Array<{ id: number; name: string; description?: string | null }>)
+    : null;
+
   return (
     <div className="space-y-5 max-w-3xl">
       <div className="flex items-center gap-3">
@@ -118,6 +141,28 @@ export default function CustomerDetailPage() {
         </div>
       </div>
 
+      {/* Auto zone suggestion banner */}
+      {suggestedZone && !editing && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Sparkles size={16} className="text-blue-500" />
+            <div>
+              <p className="text-sm font-medium text-blue-700">Zone auto-detected</p>
+              <p className="text-xs text-blue-600">Based on address "{c.address}" → <strong>{suggestedZone.name}</strong></p>
+            </div>
+          </div>
+          <button
+            onClick={async () => {
+              await updateCustomer.mutateAsync({ id, data: { name: c.name, phone: c.phone, address: c.address ?? "", zone: suggestedZone.name } });
+              await qc.invalidateQueries({ queryKey: getGetCustomerQueryKey(id) });
+            }}
+            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors whitespace-nowrap"
+          >
+            Assign Zone
+          </button>
+        </div>
+      )}
+
       {editing && (
         <div className="bg-white border rounded-xl p-5 shadow-sm">
           <h2 className="font-semibold mb-4">Edit Customer</h2>
@@ -132,11 +177,21 @@ export default function CustomerDetailPage() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5">Address</label>
-              <input type="text" value={editAddress} onChange={e => setEditAddress(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input type="text" value={editAddress} onChange={e => handleAddressChange(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5">Zone</label>
-              <input type="text" value={editZone} onChange={e => setEditZone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <select value={editZone} onChange={e => setEditZone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
+                <option value="">Select zone…</option>
+                {(zones as Array<{ id: number; name: string }>).map(z => (
+                  <option key={z.id} value={z.name}>{z.name}</option>
+                ))}
+              </select>
+              {editAddress && suggestZone(editAddress, zones as Array<{ id: number; name: string; description?: string | null }>) && (
+                <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                  <Sparkles size={10} /> Auto-suggested based on address
+                </p>
+              )}
             </div>
           </div>
           {error && <p className="text-sm text-destructive mt-3">{error}</p>}
@@ -157,7 +212,7 @@ export default function CustomerDetailPage() {
         </div>
         <div className="bg-white border rounded-xl p-4 shadow-sm flex items-center gap-3">
           <MapPin size={16} className="text-muted-foreground" />
-          <div className="text-sm">{c.zone ?? "—"}</div>
+          <div className="text-sm">{c.zone ?? <span className="text-muted-foreground italic">No zone assigned</span>}</div>
         </div>
         <div className="bg-white border rounded-xl p-4 shadow-sm flex items-center gap-3">
           <Calendar size={16} className="text-muted-foreground" />
@@ -173,10 +228,7 @@ export default function CustomerDetailPage() {
             <h2 className="font-semibold">Subscription</h2>
           </div>
           {c.activeSubscription && !confirmCancel && (
-            <button
-              onClick={() => setConfirmCancel(true)}
-              className="flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-sm hover:bg-red-100 transition-colors"
-            >
+            <button onClick={() => setConfirmCancel(true)} className="flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-sm hover:bg-red-100 transition-colors">
               <XCircle size={14} /> Expire Subscription
             </button>
           )}
@@ -193,21 +245,14 @@ export default function CustomerDetailPage() {
             <p className="text-sm font-medium text-red-700 mb-3">Are you sure? This will expire the current subscription and the customer will need to subscribe again.</p>
             {cancelError && <p className="text-sm text-destructive mb-2">{cancelError}</p>}
             <div className="flex gap-2">
-              <button
-                onClick={handleCancelSubscription}
-                disabled={cancelLoading}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-red-700 transition-colors"
-              >
+              <button onClick={handleCancelSubscription} disabled={cancelLoading} className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-red-700 transition-colors">
                 {cancelLoading ? "Expiring..." : "Yes, Expire It"}
               </button>
-              <button onClick={() => setConfirmCancel(false)} className="border px-4 py-2 rounded-lg text-sm hover:bg-accent transition-colors">
-                Cancel
-              </button>
+              <button onClick={() => setConfirmCancel(false)} className="border px-4 py-2 rounded-lg text-sm hover:bg-accent transition-colors">Cancel</button>
             </div>
           </div>
         )}
 
-        {/* All subscriptions history */}
         {allSubs.length === 0 ? (
           <p className="text-sm text-muted-foreground">No subscriptions</p>
         ) : (
