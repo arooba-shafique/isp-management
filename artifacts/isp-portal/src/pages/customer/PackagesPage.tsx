@@ -178,13 +178,13 @@ export default function CustomerPackages() {
                   <div className="text-xs text-muted-foreground">{validityLabel(pkg.validity).toLowerCase()}</div>
                 </div>
               </div>
-              <div className="mt-4">
+             <div className="mt-4">
                 <button
-                  onClick={() => !isCurrent && openDialog(pkg)}
-                  disabled={isCurrent}
-                  className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${isCurrent ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
+                  onClick={() => !isCurrent && !activeSub && openDialog(pkg)}
+                  disabled={isCurrent || !!activeSub}
+                  className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${isCurrent || activeSub ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
                 >
-                  {isCurrent ? "Current Plan" : activeSub ? "Switch to this plan" : "Subscribe"}
+                  {isCurrent ? "Current Plan" : activeSub ? "Contact Admin to Switch" : "Subscribe"}
                 </button>
               </div>
             </div>
