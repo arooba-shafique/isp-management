@@ -133,7 +133,7 @@ export default function CustomerDetailPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={startEdit} className="flex items-center gap-1.5 border px-3 py-1.5 rounded-lg text-sm hover:bg-accent transition-colors">
-            <Edit size={14} /> Assign Zone
+            <Edit size={14} /> Edit
           </button>
           <button onClick={toggleSuspend} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${c.status === "suspended" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" : "bg-red-100 text-red-700 hover:bg-red-200"}`}>
             {c.status === "suspended" ? <><CheckCircle size={14} /> Reactivate</> : <><Ban size={14} /> Suspend</>}
