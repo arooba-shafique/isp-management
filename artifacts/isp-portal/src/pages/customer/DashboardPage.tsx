@@ -55,7 +55,13 @@ export default function CustomerDashboard() {
                 <span>Expires: <strong className="text-foreground">{new Date(activeSub.endDate).toLocaleDateString()}</strong></span>
               </div>
             )}
-            {activeSub.status !== "active" && (
+           {activeSub.status === "pending-payment" && (
+              <div className="bg-amber-50 border border-amber-200 text-amber-700 rounded-lg px-4 py-3 text-sm flex items-center gap-2 mt-2">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse inline-block" />
+                Payment pending verification for <strong>{(activeSub as { package?: { name?: string } }).package?.name ?? "this package"}</strong>. Please wait for admin approval.
+              </div>
+            )}
+            {activeSub.status === "active" && (
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <Link href="/payments">
                   <button className="w-full bg-primary text-primary-foreground py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
