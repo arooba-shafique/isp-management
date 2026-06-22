@@ -1,9 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
-import { useGetCustomer, useUpdateCustomer, useSuspendCustomer, useListSubscriptions, useListPayments, useListComplaints, useListPackages, useSwitchPackage, useCreateSubscription, getGetCustomerQueryKey, getListCustomersQueryKey, getListPackagesQueryKey } from "@workspace/api-client-react";
+import { useGetCustomer, useUpdateCustomer, useSuspendCustomer, useListSubscriptions, useListPayments, useListComplaints, getGetCustomerQueryKey, getListCustomersQueryKey } from "@workspace/api-client-react";
 import { StatusBadge } from "@/components/StatusBadge";
-import { ArrowLeft, Edit, Ban, CheckCircle, Phone, MapPin, Calendar, Wifi, RefreshCw } from "lucide-react";
+import { ArrowLeft, Edit, Ban, CheckCircle, MapPin, Calendar, Wifi, XCircle } from "lucide-react";
 import { useState } from "react";
+
+const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 export default function CustomerDetailPage() {
   const [, params] = useRoute("/admin/customers/:id");
@@ -15,12 +17,9 @@ export default function CustomerDetailPage() {
   const { data: subscriptions = [] } = useListSubscriptions({ customerId: id }, { query: { queryKey: ["subs", id] } });
   const { data: payments = [] } = useListPayments({ customerId: id }, { query: { queryKey: ["payments", id] } });
   const { data: complaints = [] } = useListComplaints({ customerId: id }, { query: { queryKey: ["complaints", id] } });
-  const { data: packages = [] } = useListPackages({ query: { queryKey: getListPackagesQueryKey() } });
 
   const updateCustomer = useUpdateCustomer();
   const suspendCustomer = useSuspendCustomer();
-  const switchPkg = useSwitchPackage();
-  const createSub = useCreateSubscription();
 
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
@@ -29,11 +28,10 @@ export default function CustomerDetailPage() {
   const [editZone, setEditZone] = useState("");
   const [error, setError] = useState("");
 
-  const [switchingPkg, setSwitchingPkg] = useState(false);
-  const [selectedPkgId, setSelectedPkgId] = useState("");
-  const [switchLoading, setSwitchLoading] = useState(false);
-  const [switchError, setSwitchError] = useState("");
-  const [switchSuccess, setSwitchSuccess] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
+  const [cancelError, setCancelError] = useState("");
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   function startEdit() {
     if (!customer) return;
@@ -65,28 +63,32 @@ export default function CustomerDetailPage() {
     await qc.invalidateQueries({ queryKey: getListCustomersQueryKey() });
   }
 
-  async function handleSwitchPackage() {
-    if (!selectedPkgId) { setSwitchError("Please select a package"); return; }
-    setSwitchLoading(true);
-    setSwitchError("");
+  async function handleCancelSubscription() {
+    const activeSub = (subscriptions as Array<{ id: number; status: string }>).find(s => s.status === "active");
+    if (!activeSub) return;
+    setCancelLoading(true);
+    setCancelError("");
     try {
-      const activeSub = (subscriptions as Array<{ id: number; status: string }>).find(s => s.status === "active");
-      if (activeSub) {
-        await switchPkg.mutateAsync({ id: activeSub.id, data: { newPackageId: Number(selectedPkgId) } });
-      } else {
-        await createSub.mutateAsync({ data: { packageId: Number(selectedPkgId), customerId: id } } as any);
+      const token = localStorage.getItem("token") ?? sessionStorage.getItem("token") ?? "";
+      const res = await fetch(`${API_BASE}/api/subscriptions/${activeSub.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: "expired" }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setCancelError(data.error ?? "Failed to cancel");
+        return;
       }
       await qc.invalidateQueries({ queryKey: getGetCustomerQueryKey(id) });
       await qc.invalidateQueries({ queryKey: ["subs", id] });
-      setSwitchSuccess(true);
-      setSwitchingPkg(false);
-      setSelectedPkgId("");
-      setTimeout(() => setSwitchSuccess(false), 3000);
-    } catch (e: unknown) {
-      const err = e as { data?: { error?: string }; message?: string };
-      setSwitchError(err?.data?.error ?? err?.message ?? "Failed to switch package");
+      setCancelSuccess(true);
+      setConfirmCancel(false);
+      setTimeout(() => setCancelSuccess(false), 4000);
+    } catch {
+      setCancelError("Network error");
     } finally {
-      setSwitchLoading(false);
+      setCancelLoading(false);
     }
   }
 
@@ -94,7 +96,7 @@ export default function CustomerDetailPage() {
   if (!customer) return <div className="text-center py-12 text-muted-foreground">Customer not found</div>;
 
   const c = customer as { id: number; name: string; phone: string; status: string; zone?: string | null; address?: string | null; createdAt: string; activeSubscription?: { id: number; status: string; startDate?: string | null; endDate?: string | null; package?: { name?: string; speedMbps?: number; price?: number } | null } | null };
-  const activePackages = (packages as Array<{ id: number; name: string; speedMbps: number; price: number; isActive: boolean }>).filter(p => p.isActive);
+  const allSubs = subscriptions as Array<{ id: number; status: string; startDate?: string | null; endDate?: string | null; package?: { name?: string; speedMbps?: number; price?: number } | null }>;
 
   return (
     <div className="space-y-5 max-w-3xl">
@@ -163,73 +165,65 @@ export default function CustomerDetailPage() {
         </div>
       </div>
 
-      {/* Active Subscription */}
+      {/* Subscription Section */}
       <div className="bg-white border rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Wifi size={16} className="text-primary" />
-            <h2 className="font-semibold">Active Subscription</h2>
+            <h2 className="font-semibold">Subscription</h2>
           </div>
-          <button
-            onClick={() => { setSwitchingPkg(!switchingPkg); setSwitchError(""); setSelectedPkgId(""); }}
-            className="flex items-center gap-1.5 border px-3 py-1.5 rounded-lg text-sm hover:bg-accent transition-colors"
-          >
-            <RefreshCw size={14} /> Switch Package
-          </button>
+          {c.activeSubscription && !confirmCancel && (
+            <button
+              onClick={() => setConfirmCancel(true)}
+              className="flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-sm hover:bg-red-100 transition-colors"
+            >
+              <XCircle size={14} /> Expire Subscription
+            </button>
+          )}
         </div>
 
-        {switchSuccess && (
+        {cancelSuccess && (
           <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg px-3 py-2 text-sm mb-3">
-            <CheckCircle size={14} /> Package switched successfully!
+            <CheckCircle size={14} /> Subscription expired. Customer can now subscribe to a new package.
           </div>
         )}
 
-        {switchingPkg && (
-          <div className="bg-muted/50 rounded-xl p-4 mb-4 space-y-3">
-            <p className="text-sm font-medium">Select new package:</p>
-            <select
-              value={selectedPkgId}
-              onChange={e => setSelectedPkgId(e.target.value)}
-              className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
-            >
-              <option value="">Choose a package…</option>
-              {activePackages.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.name} — {p.speedMbps} Mbps — Rs. {Number(p.price).toLocaleString()}
-                </option>
-              ))}
-            </select>
-            {switchError && <p className="text-sm text-destructive">{switchError}</p>}
+        {confirmCancel && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+            <p className="text-sm font-medium text-red-700 mb-3">Are you sure? This will expire the current subscription and the customer will need to subscribe again.</p>
+            {cancelError && <p className="text-sm text-destructive mb-2">{cancelError}</p>}
             <div className="flex gap-2">
               <button
-                onClick={handleSwitchPackage}
-                disabled={switchLoading}
-                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-primary/90 transition-colors"
+                onClick={handleCancelSubscription}
+                disabled={cancelLoading}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-red-700 transition-colors"
               >
-                {switchLoading ? "Switching..." : "Confirm Switch"}
+                {cancelLoading ? "Expiring..." : "Yes, Expire It"}
               </button>
-              <button onClick={() => setSwitchingPkg(false)} className="border px-4 py-2 rounded-lg text-sm hover:bg-accent transition-colors">
+              <button onClick={() => setConfirmCancel(false)} className="border px-4 py-2 rounded-lg text-sm hover:bg-accent transition-colors">
                 Cancel
               </button>
             </div>
           </div>
         )}
 
-        {c.activeSubscription ? (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-medium">{c.activeSubscription.package?.name ?? "—"}</div>
-                <div className="text-sm text-muted-foreground">{c.activeSubscription.package?.speedMbps} Mbps &middot; Rs. {Number(c.activeSubscription.package?.price ?? 0).toLocaleString()}</div>
+        {/* All subscriptions history */}
+        {allSubs.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No subscriptions</p>
+        ) : (
+          <div className="space-y-3">
+            {allSubs.map(sub => (
+              <div key={sub.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <div>
+                  <div className="font-medium text-sm">{sub.package?.name ?? "—"}</div>
+                  <div className="text-xs text-muted-foreground">{sub.package?.speedMbps} Mbps · Rs. {Number(sub.package?.price ?? 0).toLocaleString()}</div>
+                  {sub.endDate && <div className="text-xs text-muted-foreground">Expires: {sub.endDate}</div>}
+                </div>
+                <StatusBadge status={sub.status} />
               </div>
-              <StatusBadge status={c.activeSubscription.status} />
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {c.activeSubscription.startDate && <span>Start: {c.activeSubscription.startDate} </span>}
-              {c.activeSubscription.endDate && <span>&rarr; End: <strong>{c.activeSubscription.endDate}</strong></span>}
-            </div>
+            ))}
           </div>
-        ) : <p className="text-sm text-muted-foreground">No active subscription</p>}
+        )}
       </div>
 
       {/* Payment History */}
@@ -237,7 +231,7 @@ export default function CustomerDetailPage() {
         <div className="px-5 py-4 border-b font-semibold">Payment History ({(payments as unknown[]).length})</div>
         {(payments as unknown[]).length === 0 ? <div className="px-5 py-6 text-sm text-muted-foreground">No payments</div> : (
           <div className="divide-y max-h-48 overflow-y-auto">
-            {(payments as Array<{ id: number; amount: number; status: string; createdAt: string; proofImageUrl?: string | null }>).map(p => (
+            {(payments as Array<{ id: number; amount: number; status: string; createdAt: string }>).map(p => (
               <div key={p.id} className="px-5 py-3 flex items-center justify-between text-sm">
                 <div>
                   <span className="font-medium">Rs. {Number(p.amount).toLocaleString()}</span>
