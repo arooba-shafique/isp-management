@@ -169,15 +169,15 @@ export default function CustomerDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1.5">Name</label>
-              <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <div className="w-full px-3 py-2 border rounded-lg text-sm bg-muted/30 text-muted-foreground">{editName}</div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5">Phone</label>
-              <input type="text" value={editPhone} onChange={e => setEditPhone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <div className="w-full px-3 py-2 border rounded-lg text-sm bg-muted/30 text-muted-foreground">{editPhone}</div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5">Address</label>
-              <input type="text" value={editAddress} onChange={e => handleAddressChange(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <div className="w-full px-3 py-2 border rounded-lg text-sm bg-muted/30 text-muted-foreground">{editAddress}</div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5">Zone</label>
