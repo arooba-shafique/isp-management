@@ -49,5 +49,13 @@ router.delete("/packages/:id", requireAdmin, async (req, res): Promise<void> => 
   if (!pkg) { res.status(404).json({ error: "Package not found" }); return; }
   res.sendStatus(204);
 });
-
+router.get("/packages/public", async (_req, res): Promise<void> => {
+  const packages = await db.select().from(packagesTable)
+    .where(eq(packagesTable.isActive, true))
+    .orderBy(packagesTable.price);
+  res.json(packages.map(p => ({
+    ...p, price: Number(p.price), speedMbps: p.speedMbps,
+    createdAt: p.createdAt.toISOString()
+  })));
+});
 export default router;
