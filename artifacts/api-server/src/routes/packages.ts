@@ -24,6 +24,16 @@ router.post("/packages", requireAdmin, async (req, res): Promise<void> => {
   res.status(201).json({ ...pkg, price: Number(pkg.price), createdAt: pkg.createdAt.toISOString() });
 });
 
+router.get("/packages/public", async (_req, res): Promise<void> => {
+  const packages = await db.select().from(packagesTable)
+    .where(eq(packagesTable.isActive, true))
+    .orderBy(packagesTable.price);
+  res.json(packages.map(p => ({
+    ...p, price: Number(p.price), speedMbps: p.speedMbps,
+    createdAt: p.createdAt.toISOString()
+  })));
+});
+
 router.patch("/packages/:id", requireAdmin, async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
@@ -49,13 +59,5 @@ router.delete("/packages/:id", requireAdmin, async (req, res): Promise<void> => 
   if (!pkg) { res.status(404).json({ error: "Package not found" }); return; }
   res.sendStatus(204);
 });
-router.get("/packages/public", async (_req, res): Promise<void> => {
-  const packages = await db.select().from(packagesTable)
-    .where(eq(packagesTable.isActive, true))
-    .orderBy(packagesTable.price);
-  res.json(packages.map(p => ({
-    ...p, price: Number(p.price), speedMbps: p.speedMbps,
-    createdAt: p.createdAt.toISOString()
-  })));
-});
+
 export default router;
