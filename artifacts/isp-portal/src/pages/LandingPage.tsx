@@ -1,14 +1,12 @@
 import { useLocation } from "wouter";
-import { useListPublicPackages, useListZones } from "@workspace/api-client-react";
+import { useListPublicPackages } from "@workspace/api-client-react";
 
 type Pkg = { id: number; name: string; speedMbps: number; price: number; validity: string; description?: string | null; isActive: boolean };
-type Zone = { id: number; name: string; description?: string | null };
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
 
   const { data: packages = [], isLoading: pkgLoading } = useListPublicPackages({ query: { retry: false } });
-  const { data: zones = [], isLoading: zoneLoading } = useListZones({ query: { retry: false } });
 
   const activePkgs = (packages as Pkg[]).filter(p => p.isActive);
   const mid = Math.floor(activePkgs.length / 2);
@@ -67,11 +65,6 @@ export default function LandingPage() {
         .lp-pkg-btn{display:block;width:100%;text-align:center;padding:10px;border-radius:8px;font-size:0.875rem;font-weight:600;border:1.5px solid rgba(59,130,246,0.3);color:#60a5fa;background:transparent;cursor:pointer;transition:all 0.2s;margin-top:auto}
         .lp-pkg-btn:hover,.lp-pkg-card.pop .lp-pkg-btn{background:#3b82f6;color:#fff;border-color:#3b82f6}
         .lp-pkg-note{font-size:0.7rem;color:#64788f;text-align:center;margin-top:6px}
-        .lp-zones-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:0.75rem}
-        .lp-zone-card{background:#0f1e36;border:1px solid rgba(59,130,246,0.12);border-radius:10px;padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:10px}
-        .lp-zone-dot{width:8px;height:8px;border-radius:50%;background:#22d3a0;flex-shrink:0;margin-top:5px;animation:lp-pulse 2s ease-in-out infinite}
-        .lp-zone-name{font-size:0.875rem;font-weight:600;margin-bottom:2px}
-        .lp-zone-desc{font-size:0.75rem;color:#64788f;line-height:1.4}
         .lp-cta{background:#0b1628;border-top:1px solid rgba(59,130,246,0.12);padding:70px 5vw;text-align:center}
         .lp-cta h2{font-size:clamp(1.4rem,3vw,2rem);font-weight:700;margin-bottom:0.75rem}
         .lp-cta p{color:#64788f;font-size:0.95rem;margin-bottom:2rem}
@@ -107,7 +100,7 @@ export default function LandingPage() {
         </a>
         <div className="lp-nav-r">
           <button className="lp-nl" onClick={() => document.getElementById("packages")?.scrollIntoView({ behavior: "smooth" })}>Packages</button>
-          <button className="lp-nl" onClick={() => document.getElementById("zones")?.scrollIntoView({ behavior: "smooth" })}>Coverage</button>
+          <button className="lp-nl" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}>How it works</button>
           <button className="lp-nb" onClick={() => navigate("/login")}>Login</button>
         </div>
       </nav>
@@ -118,7 +111,7 @@ export default function LandingPage() {
         <p>Flexible plans, transparent pricing, and 24/7 support — pick the speed that fits your life.</p>
         <div className="lp-btns">
           <button className="lp-btn lp-btn-blue" onClick={() => document.getElementById("packages")?.scrollIntoView({ behavior: "smooth" })}>See packages</button>
-          <button className="lp-btn lp-btn-ghost" onClick={() => document.getElementById("zones")?.scrollIntoView({ behavior: "smooth" })}>Check coverage</button>
+          <button className="lp-btn lp-btn-ghost" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}>How it works</button>
         </div>
       </section>
 
@@ -176,28 +169,24 @@ export default function LandingPage() {
         )}
       </section>
 
-      {/* ZONES */}
-      <section id="zones" className="lp-sec">
-        <p className="lp-sec-label">Coverage</p>
-        <h2 className="lp-sec-title">Areas we serve</h2>
-        <p className="lp-sec-sub">We're expanding fast. Check if your area is covered.</p>
-        {zoneLoading ? (
-          <div className="lp-loading"><div className="lp-spinner" /><br />Loading zones...</div>
-        ) : (zones as Zone[]).length === 0 ? (
-          <div className="lp-loading">No coverage zones found.</div>
-        ) : (
-          <div className="lp-zones-grid">
-            {(zones as Zone[]).map(z => (
-              <div key={z.id} className="lp-zone-card">
-                <div className="lp-zone-dot" />
-                <div>
-                  <div className="lp-zone-name">{z.name}</div>
-                  {z.description && <div className="lp-zone-desc">{z.description}</div>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* HOW IT WORKS */}
+      <section id="how-it-works" className="lp-sec" style={{ textAlign: "center" }}>
+        <p className="lp-sec-label">How it works</p>
+        <h2 className="lp-sec-title">Get connected in 3 easy steps</h2>
+        <p className="lp-sec-sub" style={{ margin: "0 auto 3rem" }}>From choosing a plan to surfing the web — we keep it simple.</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem", maxWidth: 800, margin: "0 auto" }}>
+          {[
+            { step: "1", title: "Choose your plan", desc: "Browse our packages and pick the speed that fits your needs and budget." },
+            { step: "2", title: "Sign up & subscribe", desc: "Create your account or log in, then subscribe to your chosen plan in seconds." },
+            { step: "3", title: "Pay & get connected", desc: "Complete payment via JazzCash, EasyPaisa, or bank transfer and start enjoying fast internet." },
+          ].map(s => (
+            <div key={s.step} style={{ textAlign: "center" }}>
+              <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#3b82f6", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", fontWeight: 700, margin: "0 auto 1rem" }}>{s.step}</div>
+              <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "0.4rem" }}>{s.title}</h3>
+              <p style={{ fontSize: "0.82rem", color: "#64788f", lineHeight: 1.6, maxWidth: 260, margin: "0 auto" }}>{s.desc}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* CTA */}
@@ -221,7 +210,7 @@ export default function LandingPage() {
         </div>
         <ul className="lp-foot-links">
           <li><button onClick={() => document.getElementById("packages")?.scrollIntoView({ behavior:"smooth" })}>Packages</button></li>
-          <li><button onClick={() => document.getElementById("zones")?.scrollIntoView({ behavior:"smooth" })}>Coverage</button></li>
+          <li><button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior:"smooth" })}>How it works</button></li>
           <li><button onClick={() => navigate("/login")}>Login</button></li>
         </ul>
         <p>© 2025 NetLink ISP</p>
