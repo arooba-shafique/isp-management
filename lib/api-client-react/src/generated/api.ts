@@ -839,7 +839,30 @@ export const getListCustomersQueryKey = (params?: ListCustomersParams,) => {
     `/api/customers`, ...(params ? [params] : [])
     ] as const;
     }
+export const getPublicPackagesUrl = () => `/api/packages/public`;
 
+export const listPublicPackages = async (options?: RequestInit): Promise<Package[]> => {
+  return customFetch<Package[]>(getPublicPackagesUrl(), { ...options, method: 'GET' });
+};
+
+export const getListPublicPackagesQueryKey = () => ['/api/packages/public'] as const;
+
+export const getListPublicPackagesQueryOptions = <TData = Awaited<ReturnType<typeof listPublicPackages>>, TError = ErrorType<unknown>>(
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listPublicPackages>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getListPublicPackagesQueryKey();
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listPublicPackages>>> = ({ signal }) => listPublicPackages({ signal, ...requestOptions });
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof listPublicPackages>>, TError, TData> & { queryKey: QueryKey };
+};
+
+export function useListPublicPackages<TData = Awaited<ReturnType<typeof listPublicPackages>>, TError = ErrorType<unknown>>(
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listPublicPackages>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListPublicPackagesQueryOptions(options);
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 export const getListCustomersQueryOptions = <TData = Awaited<ReturnType<typeof listCustomers>>, TError = ErrorType<unknown>>(params?: ListCustomersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
