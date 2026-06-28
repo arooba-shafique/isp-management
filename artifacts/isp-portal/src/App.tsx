@@ -66,7 +66,7 @@ function RootRedirect() {
 function AppRouter() {
   return (
     <Switch>
-      <Route path="/" component={RootRedirect} />
+      <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
 
       {/* Customer routes */}
