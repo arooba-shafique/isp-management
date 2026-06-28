@@ -17,6 +17,7 @@ export default function LandingPage() {
   };
 
   const validityLabel = (v: string) => ({ monthly: "Monthly", quarterly: "Quarterly", yearly: "Yearly" }[v] ?? v);
+  const perPeriod = (v: string) => ({ monthly: "/mo", quarterly: "/qtr", yearly: "/yr" }[v] ?? `/${v}`);
 
   return (
     <div style={{ fontFamily: "system-ui,-apple-system,sans-serif", background: "#060d1a", color: "#f0f6ff", minHeight: "100vh" }}>
@@ -137,7 +138,7 @@ export default function LandingPage() {
                   <div className="lp-pkg-price">
                     <span className="lp-pkg-cur">Rs.</span>
                     <span className="lp-pkg-amt">{Number(p.price).toLocaleString()}</span>
-                    <span className="lp-pkg-per">/mo</span>
+                    <span className="lp-pkg-per">{perPeriod(p.validity)}</span>
                   </div>
                   <div className="lp-pkg-val">{validityLabel(p.validity)}</div>
                   <ul className="lp-pkg-specs">
