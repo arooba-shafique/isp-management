@@ -28,22 +28,33 @@ export default function LandingPage() {
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+  const token = localStorage.getItem(TOKEN_KEY);
 
-    fetch(`${API}/packages`, { headers })
-      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
-      .then(setPackages)
-      .catch(() => setPkgError(true))
-      .finally(() => setPkgLoading(false));
+  // Try public endpoint first, fall back to authed endpoint
+  fetch(`${API}/packages/public`)
+    .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+    .then(setPackages)
+    .catch(() => {
+      // Fall back to authed endpoint if logged in
+      if (token) {
+        return fetch(`${API}/packages`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+          .then(setPackages)
+          .catch(() => setPkgError(true));
+      } else {
+        setPkgError(true);
+      }
+    })
+    .finally(() => setPkgLoading(false));
 
-    fetch(`${API}/zones`)
-      .then((r) => r.json())
-      .then(setZones)
-      .catch(() => {})
-      .finally(() => setZoneLoading(false));
-  }, []);
+  fetch(`${API}/zones`)
+    .then((r) => r.json())
+    .then(setZones)
+    .catch(() => {})
+    .finally(() => setZoneLoading(false));
+}, []);
 
   const handleSubscribe = () => {
     const token = localStorage.getItem(TOKEN_KEY);
