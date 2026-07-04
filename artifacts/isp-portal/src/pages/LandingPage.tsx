@@ -1,7 +1,6 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useListPublicPackages, getListPublicPackagesQueryKey } from "@workspace/api-client-react";
-import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import {
   Wifi,
@@ -18,8 +17,6 @@ import {
   UserCheck,
   CreditCard,
   Check,
-  Send,
-  Loader2,
   Menu,
   X
 } from "lucide-react";
@@ -40,43 +37,12 @@ export default function LandingPage() {
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Form states
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactMessage, setContactMessage] = useState("");
-  const [sendingMessage, setSendingMessage] = useState(false);
-
   // Fetch live packages from the public endpoint
   const { data: packages = [], isLoading: packagesLoading } = useListPublicPackages({
     query: { queryKey: getListPublicPackagesQueryKey() }
   });
 
   const activePackages = (packages as Pkg[]).filter((p) => p.isActive);
-
-  // Form submission handler
-  function handleSendMessage(e: React.FormEvent) {
-    e.preventDefault();
-    if (!contactName.trim() || !contactPhone.trim() || !contactMessage.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all the fields before submitting.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setSendingMessage(true);
-    setTimeout(() => {
-      setSendingMessage(false);
-      toast({
-        title: "Inquiry Sent!",
-        description: `Thank you ${contactName}, we will get back to you shortly at ${contactPhone}.`
-      });
-      setContactName("");
-      setContactPhone("");
-      setContactMessage("");
-    }, 1200);
-  }
 
   function handleSubscribeRedirect(pkgName: string) {
     toast({
@@ -595,8 +561,8 @@ export default function LandingPage() {
       <section id="contact" className="py-24 border-t border-slate-900/80 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            {/* Left Column - Contact Details */}
-            <div className="lg:col-span-5 space-y-8">
+            {/* Contact Details */}
+            <div className="lg:col-span-12 space-y-8">
               <div className="space-y-4">
                 <span className="text-[10px] font-bold text-primary uppercase tracking-widest block">
                   Support Helpdesk
@@ -669,65 +635,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right Column - Interactive Form */}
-            <div className="lg:col-span-7">
-              <form
-                onSubmit={handleSendMessage}
-                className="bg-slate-900/20 border border-slate-850 rounded-3xl p-6.5 space-y-5 backdrop-blur-xs shadow-xl"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-400">Your Name</label>
-                    <input
-                      type="text"
-                      value={contactName}
-                      onChange={(e) => setContactName(e.target.value)}
-                      placeholder="e.g. Muhammad Ali"
-                      className="w-full bg-slate-950 border border-slate-850 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-400">Phone Number</label>
-                    <input
-                      type="tel"
-                      value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
-                      placeholder="e.g. 0300-1234567"
-                      className="w-full bg-slate-950 border border-slate-850 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400">Inquiry Message</label>
-                  <textarea
-                    rows={4}
-                    value={contactMessage}
-                    onChange={(e) => setContactMessage(e.target.value)}
-                    placeholder="Tell us about your internet requirements or your address..."
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={sendingMessage}
-                  className="w-full bg-primary hover:bg-primary/95 text-white py-3 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {sendingMessage ? (
-                    <>
-                      <Loader2 size={14} className="animate-spin" />
-                      Sending Inquiry...
-                    </>
-                  ) : (
-                    <>
-                      <Send size={14} />
-                      Send Message
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
+            {/* Right Column - Empty (form removed) */}
           </div>
         </div>
       </section>
