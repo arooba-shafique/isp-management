@@ -1,13 +1,14 @@
 import { Link, useRoute, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Package, MessageSquare, LogOut, Wifi, Menu, X, User } from "lucide-react";
+import { LayoutDashboard, Package, MessageSquare, LogOut, Wifi, Menu, X, User, Settings } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/packages", label: "Packages", icon: Package },
   { href: "/complaints", label: "Support", icon: MessageSquare },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 function NavLink({ href, label, Icon, onClick }: { href: string; label: string; Icon: typeof LayoutDashboard; onClick?: () => void }) {

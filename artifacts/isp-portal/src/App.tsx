@@ -16,6 +16,8 @@ import AdminCustomers from "@/pages/admin/CustomersPage";
 import CustomerDetailPage from "@/pages/admin/CustomerDetailPage";
 import AddCustomerPage from "@/pages/admin/AddCustomerPage";
 import ImportCustomersPage from "@/pages/admin/ImportCustomersPage";
+import AdminSettingsPage from "@/pages/admin/SettingsPage";
+import CustomerSettingsPage from "@/pages/customer/SettingsPage";
 import AdminPackages from "@/pages/admin/PackagesPage";
 import AdminSubscriptions from "@/pages/admin/SubscriptionsPage";
 import AdminPayments from "@/pages/admin/PaymentsPage";
@@ -73,6 +75,7 @@ function AppRouter() {
       <Route path="/packages" component={() => <CustomerRoute component={CustomerPackages} />} />
       <Route path="/payments" component={() => <CustomerRoute component={CustomerPayments} />} />
       <Route path="/complaints" component={() => <CustomerRoute component={CustomerComplaints} />} />
+      <Route path="/settings" component={() => <CustomerRoute component={CustomerSettingsPage} />} />
 
       {/* Admin routes */}
       <Route path="/admin/dashboard" component={() => <AdminRoute component={AdminDashboard} />} />
@@ -85,6 +88,7 @@ function AppRouter() {
       <Route path="/admin/payments" component={() => <AdminRoute component={AdminPayments} />} />
       <Route path="/admin/complaints" component={() => <AdminRoute component={AdminComplaints} />} />
       <Route path="/admin/announcements" component={() => <AdminRoute component={AdminAnnouncements} />} />
+      <Route path="/admin/settings" component={() => <AdminRoute component={AdminSettingsPage} />} />
       <Route path="/admin/zones" component={() => <AdminRoute component={AdminZones} />} />
 
       <Route component={NotFound} />
