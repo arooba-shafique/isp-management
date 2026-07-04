@@ -128,7 +128,7 @@ router.post("/auth/forgot-password", async (req, res): Promise<void> => {
 
   const sent = await sendPasswordResetEmail(email, resetToken);
   if (!sent) {
-    res.status(500).json({ error: "Failed to send reset email. Please configure SMTP settings." });
+    res.status(500).json({ error: "Failed to send reset email. Please configure RESEND_API_KEY." });
     return;
   }
 
