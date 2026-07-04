@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Bell, CheckCheck, Wifi, CreditCard, MessageSquare, UserPlus, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { customFetch } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
-
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 const typeIcons: Record<string, typeof Bell> = {
   new_customer: UserPlus,
@@ -43,19 +42,19 @@ export function NotificationBell() {
 
   useEffect(() => {
     if (!user) return;
-    fetch(`${API_BASE}/api/notifications`).then(r => r.json()).then(d => {
+    customFetch("/api/notifications").then((d: any) => {
       setNotifications(d.notifications);
       setUnreadCount(d.unreadCount);
-    });
+    }).catch(() => {});
   }, [user]);
 
   useEffect(() => {
     if (!user || !open) return;
     const interval = setInterval(() => {
-      fetch(`${API_BASE}/api/notifications`).then(r => r.json()).then(d => {
+      customFetch("/api/notifications").then((d: any) => {
         setNotifications(d.notifications);
         setUnreadCount(d.unreadCount);
-      });
+      }).catch(() => {});
     }, 15000);
     return () => clearInterval(interval);
   }, [user, open]);
@@ -71,7 +70,7 @@ export function NotificationBell() {
   }, [open]);
 
   async function markAllRead() {
-    await fetch(`${API_BASE}/api/notifications/read-all`, { method: "POST" });
+    await customFetch("/api/notifications/read-all", { method: "POST" }).catch(() => {});
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     setUnreadCount(0);
   }
