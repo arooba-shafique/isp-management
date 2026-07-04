@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
-import { Wifi, Lock, KeyRound, CheckCircle, AlertCircle } from "lucide-react";
+import { Wifi, Lock, CheckCircle, AlertCircle } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
@@ -12,23 +12,24 @@ export default function ResetPasswordPage() {
   const params = new URLSearchParams(search);
   const tokenFromUrl = params.get("token") ?? "";
 
-  const [resetToken, setResetToken] = useState(tokenFromUrl);
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(""); setSuccess("");
-    if (!resetToken || !newPassword) { setError("Token and new password required"); return; }
+    setError("");
+    if (!tokenFromUrl) { setError("Invalid or missing reset token"); return; }
+    if (!newPassword) { setError("Enter a new password"); return; }
     if (newPassword.length < 6) { setError("Password must be at least 6 characters"); return; }
+    if (newPassword !== confirmPassword) { setError("Passwords do not match"); return; }
     setIsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resetToken, newPassword }),
+        body: JSON.stringify({ resetToken: tokenFromUrl, newPassword }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Failed to reset password"); return; }
@@ -56,26 +57,8 @@ export default function ResetPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold mb-1">Set New Password</h2>
-              <p className="text-sm text-muted-foreground">Enter your reset token and a new password</p>
+              <p className="text-sm text-muted-foreground">Enter your new password below</p>
             </div>
-
-            {success && (
-              <div className="flex items-center gap-2 text-sm bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-emerald-700">
-                <CheckCircle size={14} />
-                {success}
-              </div>
-            )}
-
-            {!tokenFromUrl && (
-              <div>
-                <label className="block text-sm font-medium mb-1.5">Reset Token</label>
-                <div className="relative">
-                  <KeyRound size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input type="text" value={resetToken} onChange={e => setResetToken(e.target.value)}
-                    placeholder="Paste reset token from email" className="w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" disabled={isLoading} />
-                </div>
-              </div>
-            )}
 
             <div>
               <label className="block text-sm font-medium mb-1.5">New Password</label>
@@ -83,6 +66,15 @@ export default function ResetPasswordPage() {
                 <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
                   placeholder="Enter new password" className="w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" disabled={isLoading} />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Confirm Password</label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password" className="w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" disabled={isLoading} />
               </div>
             </div>
 
