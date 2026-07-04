@@ -3,6 +3,7 @@ import { eq, and, gt } from "drizzle-orm";
 import { db, usersTable, otpCodesTable } from "@workspace/db";
 import { generateOtp, hashPassword, comparePassword, signToken } from "../lib/auth";
 import { requireAuth } from "../middlewares/auth";
+import { sendPasswordResetEmail } from "../lib/mail";
 import crypto from "crypto";
 
 const router: IRouter = Router();
@@ -112,7 +113,7 @@ router.post("/auth/change-password", requireAuth, async (req, res): Promise<void
   res.json({ message: "Password changed successfully" });
 });
 
-// Forgot password - send reset token (by email/phone)
+// Forgot password - send reset token by email
 router.post("/auth/forgot-password", async (req, res): Promise<void> => {
   const { email } = req.body;
   if (!email) { res.status(400).json({ error: "Email required" }); return; }
@@ -125,8 +126,13 @@ router.post("/auth/forgot-password", async (req, res): Promise<void> => {
 
   await db.update(usersTable).set({ resetToken, resetTokenExpiry }).where(eq(usersTable.id, user.id));
 
-  // In production, send this token via email. For now, return it directly.
-  res.json({ message: "Reset token generated", resetToken });
+  const sent = await sendPasswordResetEmail(email, resetToken);
+  if (!sent) {
+    res.status(500).json({ error: "Failed to send reset email. Please configure SMTP settings." });
+    return;
+  }
+
+  res.json({ message: "Password reset link sent to your email" });
 });
 
 // Reset password with token

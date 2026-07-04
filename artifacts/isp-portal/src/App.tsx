@@ -31,6 +31,7 @@ import { AdminLayout } from "@/components/layouts/AdminLayout";
 
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/LandingPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false, staleTime: 30_000 } },
@@ -69,6 +70,7 @@ function AppRouter() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
 
       {/* Customer routes */}
       <Route path="/dashboard" component={() => <CustomerRoute component={CustomerDashboard} />} />
