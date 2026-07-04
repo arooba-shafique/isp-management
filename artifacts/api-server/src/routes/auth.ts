@@ -50,8 +50,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
 router.post("/auth/register", async (req, res): Promise<void> => {
   const phone: string = (req.body.phone ?? "").trim();
   const { name, email, password, address, zone } = req.body;
-  if (!phone || !name || !password) {
-    res.status(400).json({ error: "phone, name, password required" }); return;
+  if (!phone || !name || !email || !password) {
+    res.status(400).json({ error: "phone, name, email, password required" }); return;
   }
 
   const [existing] = await db.select().from(usersTable).where(eq(usersTable.phone, phone));

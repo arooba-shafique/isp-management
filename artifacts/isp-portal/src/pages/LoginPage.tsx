@@ -81,13 +81,13 @@ export default function LoginPage() {
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!name.trim() || !password.trim() || !address.trim()) { setError("Name, password and address are required"); return; }
+    if (!name.trim() || !email.trim() || !password.trim() || !address.trim()) { setError("Name, email, password and address are required"); return; }
     setIsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phone.trim(), name, email: email.trim() || undefined, password, address }),
+        body: JSON.stringify({ phone: phone.trim(), name, email: email.trim(), password, address }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Registration failed"); return; }
@@ -245,7 +245,7 @@ export default function LoginPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5">Email <span className="text-xs text-muted-foreground">(optional, for password recovery)</span></label>
+                <label className="block text-sm font-medium mb-1.5">Email <span className="text-destructive">*</span></label>
                 <div className="relative">
                   <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="ali@example.com"
