@@ -425,7 +425,7 @@ export default function LandingPage() {
 
         {packagesLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             <span className="text-sm text-slate-400 font-semibold">Loading packages...</span>
           </div>
         ) : activePackages.length === 0 ? (
