@@ -4,11 +4,12 @@ import { logger } from "./logger";
 export async function sendPasswordResetEmail(to: string, resetToken: string, frontendUrl?: string): Promise<{ ok: boolean; error?: string }> {
   const baseUrl = frontendUrl || process.env.FRONTEND_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
   const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
-  const from = process.env.SMTP_FROM || "NetLink ISP <noreply@netlink.pk>";
+  const smtpFrom = process.env.SMTP_FROM || "NetLink ISP <noreply@netlink.pk>";
 
   // Try 1: Resend API
   const resendKey = process.env.RESEND_API_KEY;
   if (resendKey) {
+    const resendFrom = process.env.RESEND_FROM || smtpFrom;
     try {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -17,7 +18,7 @@ export async function sendPasswordResetEmail(to: string, resetToken: string, fro
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from,
+          from: resendFrom,
           to,
           subject: "Password Reset - NetLink ISP",
           html: `
@@ -54,7 +55,7 @@ export async function sendPasswordResetEmail(to: string, resetToken: string, fro
       });
 
       await transporter.sendMail({
-        from,
+        from: smtpFrom,
         to,
         subject: "Password Reset - NetLink ISP",
         html: `
