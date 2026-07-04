@@ -154,4 +154,11 @@ router.post("/auth/reset-password", async (req, res): Promise<void> => {
   res.json({ message: "Password reset successfully", token, user: { id: user.id, phone: user.phone, name: user.name, email: user.email, role: user.role, status: user.status, address: user.address, zone: user.zone, createdAt: user.createdAt } });
 });
 
+// Public: get admin contact info for landing page
+router.get("/public/admins", async (_req, res): Promise<void> => {
+  const admins = await db.select({ name: usersTable.name, phone: usersTable.phone })
+    .from(usersTable).where(eq(usersTable.role, "admin"));
+  res.json(admins);
+});
+
 export default router;

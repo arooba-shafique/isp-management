@@ -47,9 +47,13 @@ export default function LandingPage() {
   const maxSpeed = Math.max(...activePackages.map(p => p.speedMbps), 0);
 
   const [zones, setZones] = useState<string[]>([]);
+  const [admins, setAdmins] = useState<Array<{name: string; phone: string}>>([]);
   useEffect(() => {
     customFetch("/api/zones").then((d: any) => {
       setZones((d as Array<{name: string}>).map(z => z.name));
+    }).catch(() => {});
+    customFetch("/api/public/admins").then((d: any) => {
+      setAdmins(d as Array<{name: string; phone: string}>);
     }).catch(() => {});
   }, []);
 
@@ -591,12 +595,15 @@ export default function LandingPage() {
                     <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">
                       Helpline Numbers
                     </span>
-                    <a href="tel:03496641464" className="hover:text-primary transition-colors block">
-                      0349-6641464
-                    </a>
-                    <a href="tel:03286687112" className="hover:text-primary transition-colors block">
-                      0328-6687112
-                    </a>
+                    {admins.length === 0 ? (
+                      <span className="text-slate-500">Loading...</span>
+                    ) : (
+                      admins.map(a => (
+                        <a key={a.phone} href={`tel:${a.phone}`} className="hover:text-primary transition-colors block">
+                          {a.phone.replace(/(\d{4})(\d{7})/, "$1-$2")}
+                        </a>
+                      ))
+                    )}
                   </div>
                 </div>
 
