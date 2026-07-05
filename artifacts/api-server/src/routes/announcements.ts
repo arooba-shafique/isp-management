@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and } from "drizzle-orm";
-import { db, announcementsTable, usersTable } from "@workspace/db";
+import { db, announcementsTable, usersTable, notificationsTable } from "@workspace/db";
 import { requireAuth, requireAdmin } from "../middlewares/auth";
 import { sendSms, sendWhatsApp } from "../lib/notifications";
 
@@ -24,8 +24,17 @@ router.post("/announcements", requireAdmin, async (req, res): Promise<void> => {
     title, message, targetZone: targetZone ?? null, recipientCount
   }).returning();
 
-  const fullMsg = `${title}: ${message}`;
+  // Create notifications for each customer so bell icon shows badge
   for (const cust of customers) {
+    await db.insert(notificationsTable).values({
+      userId: cust.id,
+      type: "announcement",
+      title,
+      message,
+      relatedId: announcement.id,
+    }).catch(() => {});
+
+    const fullMsg = `${title}: ${message}`;
     await sendSms(cust.phone, fullMsg).catch(() => {});
     await sendWhatsApp(cust.phone, fullMsg).catch(() => {});
   }

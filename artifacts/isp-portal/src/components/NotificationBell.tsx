@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, CheckCheck, Wifi, CreditCard, MessageSquare, UserPlus, X } from "lucide-react";
+import { Bell, CheckCheck, Wifi, CreditCard, MessageSquare, UserPlus, X, Megaphone } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { customFetch } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ const typeIcons: Record<string, typeof Bell> = {
   payment_rejected: X,
   new_complaint: MessageSquare,
   complaint_updated: MessageSquare,
+  announcement: Megaphone,
 };
 
 const typeColors: Record<string, string> = {
@@ -20,6 +21,7 @@ const typeColors: Record<string, string> = {
   payment_rejected: "text-red-500",
   new_complaint: "text-purple-500",
   complaint_updated: "text-purple-500",
+  announcement: "text-primary",
 };
 
 interface NotificationItem {

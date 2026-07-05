@@ -1,9 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useListAnnouncements, useCreateAnnouncement, getListAnnouncementsQueryKey } from "@workspace/api-client-react";
+import { useListAnnouncements, useCreateAnnouncement, getListAnnouncementsQueryKey, customFetch } from "@workspace/api-client-react";
 import { Megaphone, Plus, X, CheckCircle, Users } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Announcement = { id: number; title: string; message: string; targetZone?: string | null; recipientCount?: number | null; createdAt: string };
+type Zone = { id: number; name: string };
 
 export default function AdminAnnouncements() {
   const qc = useQueryClient();
@@ -15,6 +16,11 @@ export default function AdminAnnouncements() {
   const [zone, setZone] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [zones, setZones] = useState<Zone[]>([]);
+
+  useEffect(() => {
+    customFetch("/api/zones").then((d: any) => setZones(d as Zone[])).catch(() => {});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -69,7 +75,12 @@ export default function AdminAnnouncements() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5">Zone Filter <span className="text-muted-foreground font-normal">(leave blank for all customers)</span></label>
-              <input type="text" value={zone} onChange={e => setZone(e.target.value)} placeholder="e.g. Zone A" className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <select value={zone} onChange={e => setZone(e.target.value)} className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
+                <option value="">All Zones</option>
+                {zones.map(z => (
+                  <option key={z.id} value={z.name}>{z.name}</option>
+                ))}
+              </select>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <div className="flex gap-2">
