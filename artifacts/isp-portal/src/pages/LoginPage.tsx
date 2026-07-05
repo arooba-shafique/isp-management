@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { } from "@workspace/api-client-react";
 import { Wifi, Phone, User, MapPin, Lock, Mail, KeyRound } from "lucide-react";
 
-const ADMIN_PHONES = ["03496641464", "03286687112"];
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 type Step = "phone" | "password" | "register" | "claim" | "forgot" | "forgot-sent";
@@ -22,6 +21,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [needsClaim, setNeedsClaim] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [isPhoneAdmin, setIsPhoneAdmin] = useState(false);
 
 
   async function handleCheckPhone(e: React.FormEvent) {
@@ -29,10 +29,6 @@ export default function LoginPage() {
     setError("");
     const trimmed = phone.trim();
     if (!trimmed) { setError("Please enter your phone number"); return; }
-
-    if (ADMIN_PHONES.includes(trimmed)) {
-      setStep("password"); return;
-    }
 
     setIsLoading(true);
     try {
@@ -44,9 +40,10 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Error checking phone"); return; }
 
-      if (data.type === "new") { setStep("register"); }
-      else if (data.needsClaim) { setNeedsClaim(true); setStep("claim"); }
-      else { setStep("password"); }
+      if (data.type === "admin") { setIsPhoneAdmin(true); setStep("password"); }
+      else if (data.type === "new") { setIsPhoneAdmin(false); setStep("register"); }
+      else if (data.needsClaim) { setIsPhoneAdmin(false); setNeedsClaim(true); setStep("claim"); }
+      else { setIsPhoneAdmin(false); setStep("password"); }
     } catch {
       setError("Network error");
     } finally {
@@ -179,7 +176,7 @@ export default function LoginPage() {
           {step === "password" && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <h2 className="text-lg font-semibold mb-1">{ADMIN_PHONES.includes(phone.trim()) ? "Admin Login" : "Welcome Back"}</h2>
+                <h2 className="text-lg font-semibold mb-1">{isPhoneAdmin ? "Admin Login" : "Welcome Back"}</h2>
                 <p className="text-sm text-muted-foreground">Enter your password for <strong>{phone}</strong></p>
               </div>
               <div>
@@ -198,7 +195,7 @@ export default function LoginPage() {
               <button type="button" onClick={() => { setStep("forgot"); setError(""); setForgotEmail(""); }} className="w-full text-sm text-primary hover:underline transition-colors">
                 Forgot password?
               </button>
-              <button type="button" onClick={() => { setStep("phone"); setError(""); setPassword(""); }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <button type="button" onClick={() => { setStep("phone"); setError(""); setPassword(""); setIsPhoneAdmin(false); }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Change phone number
               </button>
             </form>
@@ -247,7 +244,7 @@ export default function LoginPage() {
               <button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
                 {isLoading ? "Creating account..." : "Create Account"}
               </button>
-              <button type="button" onClick={() => { setStep("phone"); setError(""); }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <button type="button" onClick={() => { setStep("phone"); setError(""); setIsPhoneAdmin(false); }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Change phone number
               </button>
             </form>

@@ -8,16 +8,10 @@ import crypto from "crypto";
 
 const router: IRouter = Router();
 
-const ADMIN_PHONES = ["03496641464", "03286687112"];
-
 // Check if phone exists
 router.post("/auth/check-phone", async (req, res): Promise<void> => {
   const phone: string = (req.body.phone ?? "").trim();
   if (!phone) { res.status(400).json({ error: "Phone required" }); return; }
-
-  if (ADMIN_PHONES.includes(phone)) {
-    res.json({ type: "admin" }); return;
-  }
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.phone, phone));
 
@@ -26,6 +20,9 @@ router.post("/auth/check-phone", async (req, res): Promise<void> => {
   }
   if (user.status === "suspended") {
     res.status(403).json({ error: "Account suspended" }); return;
+  }
+  if (user.role === "admin") {
+    res.json({ type: "admin" }); return;
   }
   res.json({ type: "existing", needsClaim: user.status === "pending-claim" });
 });
