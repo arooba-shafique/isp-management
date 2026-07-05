@@ -1,13 +1,14 @@
 import { Link, useRoute, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Package, MessageSquare, LogOut, Wifi, Menu, X, User, Settings } from "lucide-react";
+import { LayoutDashboard, Package, MessageSquare, LogOut, Wifi, Menu, X, User, Settings, Megaphone } from "lucide-react";
 import { useState } from "react";
 import { NotificationBell } from "@/components/NotificationBell";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/packages", label: "Packages", icon: Package },
+  { href: "/announcements", label: "Announcements", icon: Megaphone },
   { href: "/complaints", label: "Support", icon: MessageSquare },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

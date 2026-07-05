@@ -11,6 +11,7 @@ import CustomerDashboard from "@/pages/customer/DashboardPage";
 import CustomerPackages from "@/pages/customer/PackagesPage";
 import CustomerPayments from "@/pages/customer/PaymentsPage";
 import CustomerComplaints from "@/pages/customer/ComplaintsPage";
+import CustomerAnnouncements from "@/pages/customer/AnnouncementsPage";
 import AdminDashboard from "@/pages/admin/DashboardPage";
 import AdminCustomers from "@/pages/admin/CustomersPage";
 import CustomerDetailPage from "@/pages/admin/CustomerDetailPage";
@@ -77,6 +78,7 @@ function AppRouter() {
       <Route path="/packages" component={() => <CustomerRoute component={CustomerPackages} />} />
       <Route path="/payments" component={() => <CustomerRoute component={CustomerPayments} />} />
       <Route path="/complaints" component={() => <CustomerRoute component={CustomerComplaints} />} />
+      <Route path="/announcements" component={() => <CustomerRoute component={CustomerAnnouncements} />} />
       <Route path="/settings" component={() => <CustomerRoute component={CustomerSettingsPage} />} />
 
       {/* Admin routes */}
