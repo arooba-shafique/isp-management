@@ -11,9 +11,11 @@ router.get("/dashboard/stats", requireAdmin, async (req, res): Promise<void> => 
 
   const allCustomers = await db.select().from(usersTable).where(eq(usersTable.role, "customer"));
   const totalCustomers = allCustomers.length;
-  const activeCustomers = allCustomers.filter(c => c.status === "active").length;
 
-  const allSubscriptions = await db.select().from(subscriptionsTable);
+  const allSubscriptions = await db.select().from(subscriptionsTable).where(eq(subscriptionsTable.status, "active"));
+  const activeSubscriptionCustomerIds = new Set(allSubscriptions.map(s => s.customerId));
+  const activeCustomers = allCustomers.filter(c => c.status === "active" || activeSubscriptionCustomerIds.has(c.id)).length;
+
   const allPayments = await db.select().from(paymentsTable);
 
   const verifiedPaymentsThisMonth = allPayments.filter(p =>
