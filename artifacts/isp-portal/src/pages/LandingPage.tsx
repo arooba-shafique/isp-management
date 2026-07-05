@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useListPublicPackages, getListPublicPackagesQueryKey, customFetch } from "@workspace/api-client-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Wifi,
@@ -44,10 +44,12 @@ export default function LandingPage() {
   });
 
   const activePackages = (packages as Pkg[]).filter((p) => p.isActive);
-  const maxSpeed = Math.max(...activePackages.map(p => p.speedMbps), 0);
 
   const [zones, setZones] = useState<string[]>([]);
   const [admins, setAdmins] = useState<Array<{name: string; phone: string}>>([]);
+  const [liveSpeed, setLiveSpeed] = useState<number | null>(null);
+  const speedRan = useRef(false);
+
   useEffect(() => {
     customFetch("/api/zones").then((d: any) => {
       setZones((d as Array<{name: string}>).map(z => z.name));
@@ -55,6 +57,34 @@ export default function LandingPage() {
     customFetch("/api/public/admins").then((d: any) => {
       setAdmins(d as Array<{name: string; phone: string}>);
     }).catch(() => {});
+  }, []);
+
+  // Run a quick speed test on landing page load
+  useEffect(() => {
+    if (speedRan.current) return;
+    speedRan.current = true;
+
+    const API = import.meta.env.VITE_API_URL ?? "";
+    async function runSpeedTest() {
+      try {
+        const res = await fetch(`${API}/api/speedtest/download?size=5`);
+        const reader = res.body!.getReader();
+        const contentLength = Number(res.headers.get("Content-Length")) || 5 * 1024 * 1024;
+        let received = 0;
+        const start = performance.now();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          received += value!.byteLength;
+        }
+        const elapsed = (performance.now() - start) / 1000;
+        const mbps = (received * 8) / elapsed / 1_000_000;
+        setLiveSpeed(Math.round(mbps * 10) / 10);
+      } catch {
+        setLiveSpeed(null);
+      }
+    }
+    runSpeedTest();
   }, []);
 
   function handleSubscribeRedirect(pkgName: string) {
@@ -298,14 +328,25 @@ export default function LandingPage() {
               <div className="my-auto text-center space-y-2 py-8 relative">
                 <div className="inline-flex w-24 h-24 rounded-full border-4 border-slate-800 border-t-primary items-center justify-center animate-spin duration-[4s]" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -mt-4">
-                  <span className="block text-4xl font-black text-white tracking-tight">{maxSpeed || 50}</span>
-                  <span className="block text-[10px] font-bold text-primary tracking-widest uppercase -mt-1.5">
-                    Mbps
-                  </span>
+                  {liveSpeed !== null ? (
+                    <>
+                      <span className="block text-4xl font-black text-white tracking-tight">{liveSpeed}</span>
+                      <span className="block text-[10px] font-bold text-primary tracking-widest uppercase -mt-1.5">
+                        Mbps
+                      </span>
+                    </>
+                  ) : (
+                    <span className="block w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                  )}
                 </div>
                 <div className="pt-2 text-xs font-semibold text-slate-400">
-                  Active User Speed Test
+                  {liveSpeed !== null ? "Your Live Speed" : "Testing..."}
                 </div>
+                {liveSpeed !== null && (
+                  <a href="/login" className="inline-block mt-2 text-[11px] font-bold text-primary hover:text-primary/80 transition-colors underline underline-offset-2">
+                    Test Again &rarr;
+                  </a>
+                )}
               </div>
 
               {/* Status List */}
