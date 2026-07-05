@@ -342,11 +342,6 @@ export default function LandingPage() {
                 <div className="pt-2 text-xs font-semibold text-slate-400">
                   {liveSpeed !== null ? "Your Live Speed" : "Testing..."}
                 </div>
-                {liveSpeed !== null && (
-                  <a href="/login" className="inline-block mt-2 text-[11px] font-bold text-primary hover:text-primary/80 transition-colors underline underline-offset-2">
-                    Test Again &rarr;
-                  </a>
-                )}
               </div>
 
               {/* Status List */}
