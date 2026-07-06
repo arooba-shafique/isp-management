@@ -88,6 +88,7 @@ export default function AdminCustomers() {
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Customer</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Zone</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Address</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden xl:table-cell">NID</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Package</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Expiry</th>
@@ -103,6 +104,7 @@ export default function AdminCustomers() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{c.zone ?? "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs hidden lg:table-cell">{c.address ?? "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs hidden xl:table-cell">{c.nid ?? "—"}</td>
                     <td className="px-4 py-3">
                       <div className="text-sm">{c.currentPackageName ?? "—"}</div>
                       {c.hasPendingPayment && <div className="text-xs text-amber-600 font-medium">Pending payment</div>}
