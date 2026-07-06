@@ -137,7 +137,7 @@ export default function CustomerDetailPage() {
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   if (!customer) return <div className="text-center py-12 text-muted-foreground">Customer not found</div>;
 
-  const c = customer as { id: number; name: string; phone: string; status: string; zone?: string | null; address?: string | null; createdAt: string; activeSubscription?: { id: number; status: string; startDate?: string | null; endDate?: string | null; package?: { name?: string; speedMbps?: number; price?: number } | null } | null };
+  const c = customer as { id: number; name: string; phone: string; status: string; zone?: string | null; address?: string | null; nid?: string | null; createdAt: string; activeSubscription?: { id: number; status: string; startDate?: string | null; endDate?: string | null; package?: { name?: string; speedMbps?: number; price?: number } | null } | null };
   const allSubs = subscriptions as Array<{ id: number; status: string; startDate?: string | null; endDate?: string | null; package?: { name?: string; speedMbps?: number; price?: number } | null }>;
 
   const suggestedZone = !c.zone && c.address
@@ -227,7 +227,7 @@ export default function CustomerDetailPage() {
         </div>
       )}
       {/* Info Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white border rounded-xl p-4 shadow-sm flex items-center gap-3">
           <StatusBadge status={c.status} />
           <div className="text-xs text-muted-foreground">Account Status</div>
@@ -240,6 +240,12 @@ export default function CustomerDetailPage() {
           <Calendar size={16} className="text-muted-foreground" />
           <div className="text-xs text-muted-foreground">Joined {new Date(c.createdAt).toLocaleDateString()}</div>
         </div>
+        {c.nid && (
+          <div className="bg-white border rounded-xl p-4 shadow-sm">
+            <div className="text-xs text-muted-foreground mb-1">NID</div>
+            <div className="text-sm font-medium">{c.nid}</div>
+          </div>
+        )}
       </div>
 
       {/* Subscription Section */}

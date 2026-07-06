@@ -7,7 +7,7 @@ import { Link } from "wouter";
 
 type Customer = {
   id: number; phone: string; name: string; status: string;
-  zone?: string | null; address?: string | null; createdAt: string;
+  zone?: string | null; address?: string | null; nid?: string | null; createdAt: string;
   currentPackageName?: string | null; subscriptionStatus?: string | null;
   subscriptionEndDate?: string | null; hasPendingPayment: boolean;
 };
