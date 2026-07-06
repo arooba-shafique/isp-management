@@ -33,7 +33,7 @@ router.get("/customers", requireAdmin, async (req, res): Promise<void> => {
       .where(and(eq(paymentsTable.customerId, c.id), eq(paymentsTable.status, "pending"))).limit(1);
 
     return {
-      id: c.id, phone: c.phone, name: c.name, status: c.status, address: c.address, zone: c.zone, nid: c.nid,
+      id: c.id, phone: c.phone, name: c.name, status: c.status, address: c.address, zone: c.zone,
       createdAt: c.createdAt.toISOString(),
       currentPackageName,
       subscriptionStatus: activeSub?.status ?? null,
@@ -100,7 +100,7 @@ router.get("/customers/:id", requireAdmin, async (req, res): Promise<void> => {
 
   res.json({
     id: c.id, phone: c.phone, name: c.name, role: c.role, status: c.status,
-    address: c.address, zone: c.zone, nid: c.nid, createdAt: c.createdAt.toISOString(),
+    address: c.address, zone: c.zone, createdAt: c.createdAt.toISOString(),
     activeSubscription: activeSubWithPackage
   });
 });
@@ -141,17 +141,16 @@ router.post("/customers", requireAdmin, async (req, res): Promise<void> => {
 router.patch("/customers/:id", requireAdmin, async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
-  const { name, address, zone, phone, nid } = req.body;
+  const { name, address, zone, phone } = req.body;
   const updates: Record<string, unknown> = {};
   if (name !== undefined) updates.name = name;
   if (address !== undefined) updates.address = address;
   if (zone !== undefined) updates.zone = zone;
   if (phone !== undefined) updates.phone = phone;
-  if (nid !== undefined) updates.nid = nid;
 
   const [updated] = await db.update(usersTable).set(updates).where(eq(usersTable.id, id)).returning();
   if (!updated) { res.status(404).json({ error: "Customer not found" }); return; }
-  res.json({ id: updated.id, phone: updated.phone, name: updated.name, role: updated.role, status: updated.status, address: updated.address, zone: updated.zone, nid: updated.nid, createdAt: updated.createdAt.toISOString() });
+  res.json({ id: updated.id, phone: updated.phone, name: updated.name, role: updated.role, status: updated.status, address: updated.address, zone: updated.zone, createdAt: updated.createdAt.toISOString() });
 });
 
 router.delete("/customers/:id", requireAdmin, async (req, res): Promise<void> => {
