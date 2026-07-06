@@ -175,4 +175,16 @@ router.post("/customers/:id/suspend", requireAdmin, async (req, res): Promise<vo
   res.json({ id: updated.id, phone: updated.phone, name: updated.name, role: updated.role, status: updated.status, address: updated.address, zone: updated.zone, createdAt: updated.createdAt.toISOString() });
 });
 
+router.post("/customers/:id/reset-password", requireAdmin, async (req, res): Promise<void> => {
+  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const id = parseInt(raw, 10);
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 6) { res.status(400).json({ error: "Password must be at least 6 characters" }); return; }
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, id));
+  if (!user) { res.status(404).json({ error: "Customer not found" }); return; }
+  const passwordHash = await hashPassword(newPassword);
+  await db.update(usersTable).set({ passwordHash }).where(eq(usersTable.id, id));
+  res.json({ message: "Password reset successfully", phone: user.phone });
+});
+
 export default router;

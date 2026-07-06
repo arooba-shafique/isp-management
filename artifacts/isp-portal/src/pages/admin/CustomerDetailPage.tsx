@@ -48,6 +48,11 @@ export default function CustomerDetailPage() {
   const [newEndDate, setNewEndDate] = useState("");
   const [expiryLoading, setExpiryLoading] = useState(false);
 
+  const [resetPwdOpen, setResetPwdOpen] = useState(false);
+  const [resetPwd, setResetPwd] = useState("");
+  const [resetPwdLoading, setResetPwdLoading] = useState(false);
+  const [resetPwdMsg, setResetPwdMsg] = useState("");
+
   function startEdit() {
     if (!customer) return;
     const c = customer as { name: string; phone: string; address?: string | null; zone?: string | null };
@@ -134,6 +139,29 @@ export default function CustomerDetailPage() {
     }
   }
 
+  async function handleResetPassword() {
+    if (resetPwd.length < 6) { setResetPwdMsg("Password must be at least 6 characters"); return; }
+    setResetPwdLoading(true);
+    setResetPwdMsg("");
+    try {
+      const token = localStorage.getItem("isp_token") ?? "";
+      const res = await fetch(`${API_BASE}/api/customers/${id}/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ newPassword: resetPwd }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setResetPwdMsg(data.error ?? "Failed"); return; }
+      setResetPwdMsg("Password reset successfully!");
+      setResetPwd("");
+      setTimeout(() => { setResetPwdOpen(false); setResetPwdMsg(""); }, 2000);
+    } catch {
+      setResetPwdMsg("Network error");
+    } finally {
+      setResetPwdLoading(false);
+    }
+  }
+
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   if (!customer) return <div className="text-center py-12 text-muted-foreground">Customer not found</div>;
 
@@ -158,11 +186,33 @@ export default function CustomerDetailPage() {
           <button onClick={startEdit} className="flex items-center gap-1.5 border px-3 py-1.5 rounded-lg text-sm hover:bg-accent transition-colors">
             <Edit size={14} /> Edit
           </button>
+          <button onClick={() => setResetPwdOpen(true)} className="flex items-center gap-1.5 border px-3 py-1.5 rounded-lg text-sm hover:bg-accent transition-colors">
+            Reset Password
+          </button>
           <button onClick={toggleSuspend} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${c.status === "suspended" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" : "bg-red-100 text-red-700 hover:bg-red-200"}`}>
             {c.status === "suspended" ? <><CheckCircle size={14} /> Reactivate</> : <><Ban size={14} /> Suspend</>}
           </button>
         </div>
       </div>
+
+      {/* Reset Password Modal */}
+      {resetPwdOpen && (
+        <div className="bg-white border rounded-xl p-5 shadow-sm">
+          <h2 className="font-semibold mb-3">Reset Password for {c.name}</h2>
+          <input type="password" placeholder="New password (min 6 characters)" value={resetPwd}
+            onChange={e => setResetPwd(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 mb-3" />
+          {resetPwdMsg && <p className={`text-sm mb-2 ${resetPwdMsg.includes("success") ? "text-emerald-600" : "text-destructive"}`}>{resetPwdMsg}</p>}
+          <div className="flex gap-2">
+            <button onClick={handleResetPassword} disabled={resetPwdLoading}
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-primary/90 transition-colors">
+              {resetPwdLoading ? "Resetting..." : "Reset Password"}
+            </button>
+            <button onClick={() => { setResetPwdOpen(false); setResetPwd(""); setResetPwdMsg(""); }}
+              className="border px-4 py-2 rounded-lg text-sm hover:bg-accent transition-colors">Cancel</button>
+          </div>
+        </div>
+      )}
 
       {/* Auto zone suggestion banner */}
       {suggestedZone && !editing && (
@@ -186,7 +236,7 @@ export default function CustomerDetailPage() {
         </div>
       )}
 
-   {editing && (
+      {editing && (
         <div className="bg-white border rounded-xl p-5 shadow-sm">
           <h2 className="font-semibold mb-4">Edit Customer</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
