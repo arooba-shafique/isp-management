@@ -46,7 +46,7 @@ export default function LandingPage() {
   const activePackages = (packages as Pkg[]).filter((p) => p.isActive);
 
   const [zones, setZones] = useState<string[]>([]);
-  const [admins, setAdmins] = useState<Array<{name: string; phone: string}>>([]);
+  const admins = [{ name: "Admin", phone: "03296934055" }];
   const [liveSpeed, setLiveSpeed] = useState<number | null>(null);
   const speedRan = useRef(false);
 
@@ -54,9 +54,7 @@ export default function LandingPage() {
     customFetch("/api/zones").then((d: any) => {
       setZones((d as Array<{name: string}>).map(z => z.name));
     }).catch(() => {});
-    customFetch("/api/public/admins").then((d: any) => {
-      setAdmins(d as Array<{name: string; phone: string}>);
-    }).catch(() => {});
+    
   }, []);
 
   // Run a quick speed test on landing page load
@@ -651,8 +649,8 @@ export default function LandingPage() {
                     <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">
                       Support Email
                     </span>
-                    <a href="mailto:support@netlink.pk" className="hover:text-primary transition-colors">
-                      support@netlink.pk
+                    <a href="mailto:mehtabrasoolmm@gmail.com" className="hover:text-primary transition-colors">
+                      mehtabrasoolmm@gmail.com
                     </a>
                   </div>
                 </div>
@@ -666,7 +664,7 @@ export default function LandingPage() {
                       Physical Office
                     </span>
                     <p className="text-slate-300">
-                      NetLink ISP Office, Sahiwal, Punjab, Pakistan
+                      65/5-L Sahiwal, Punjab, Pakistan
                     </p>
                   </div>
                 </div>
