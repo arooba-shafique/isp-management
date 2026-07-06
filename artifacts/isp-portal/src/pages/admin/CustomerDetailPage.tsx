@@ -44,6 +44,10 @@ export default function CustomerDetailPage() {
   const [cancelError, setCancelError] = useState("");
   const [confirmCancel, setConfirmCancel] = useState(false);
 
+  const [editingExpiry, setEditingExpiry] = useState<number | null>(null);
+  const [newEndDate, setNewEndDate] = useState("");
+  const [expiryLoading, setExpiryLoading] = useState(false);
+
   function startEdit() {
     if (!customer) return;
     const c = customer as { name: string; phone: string; address?: string | null; zone?: string | null };
@@ -108,6 +112,25 @@ export default function CustomerDetailPage() {
       setCancelError("Network error");
     } finally {
       setCancelLoading(false);
+    }
+  }
+
+  async function saveExpiryDate(subId: number) {
+    setExpiryLoading(true);
+    try {
+      const token = localStorage.getItem("isp_token") ?? "";
+      const res = await fetch(`${API_BASE}/api/subscriptions/${subId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ endDate: newEndDate }),
+      });
+      if (res.ok) {
+        await qc.invalidateQueries({ queryKey: getGetCustomerQueryKey(id) });
+        await qc.invalidateQueries({ queryKey: ["subs", id] });
+        setEditingExpiry(null);
+      }
+    } finally {
+      setExpiryLoading(false);
     }
   }
 
@@ -261,7 +284,23 @@ export default function CustomerDetailPage() {
                 <div>
                   <div className="font-medium text-sm">{sub.package?.name ?? "—"}</div>
                   <div className="text-xs text-muted-foreground">{sub.package?.speedMbps} Mbps · Rs. {Number(sub.package?.price ?? 0).toLocaleString()}</div>
-                  {sub.endDate && <div className="text-xs text-muted-foreground">Expires: {sub.endDate}</div>}
+                  {sub.endDate && editingExpiry === sub.id ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <input type="date" value={newEndDate} onChange={e => setNewEndDate(e.target.value)}
+                        className="text-xs border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                      <button onClick={() => saveExpiryDate(sub.id)} disabled={expiryLoading}
+                        className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/90 disabled:opacity-50">
+                        {expiryLoading ? "..." : "Save"}
+                      </button>
+                      <button onClick={() => setEditingExpiry(null)} className="text-xs text-muted-foreground hover:underline">Cancel</button>
+                    </div>
+                  ) : sub.endDate ? (
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      Expires: {sub.endDate}
+                      <button onClick={() => { setEditingExpiry(sub.id); setNewEndDate(sub.endDate!); }}
+                        className="text-primary hover:underline ml-1">Edit</button>
+                    </div>
+                  ) : null}
                 </div>
                 <StatusBadge status={sub.status} />
               </div>
