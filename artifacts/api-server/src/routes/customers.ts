@@ -106,13 +106,16 @@ router.get("/customers/:id", requireAdmin, async (req, res): Promise<void> => {
 });
 
 router.post("/customers", requireAdmin, async (req, res): Promise<void> => {
-  const { phone, name, address, zone, packageId, dueDate } = req.body;
+  const { phone, name, address, zone, packageId, dueDate, status } = req.body;
   if (!phone || !name) { res.status(400).json({ error: "phone and name required" }); return; }
   const [existing] = await db.select().from(usersTable).where(eq(usersTable.phone, phone));
   if (existing) { res.status(409).json({ error: "Phone already registered" }); return; }
 
+  const validStatuses = ["active", "suspended", "pending-claim"];
+  const customerStatus = validStatuses.includes(status) ? status : "pending-claim";
+
   const [user] = await db.insert(usersTable).values({
-    phone, name, address, zone, role: "customer", status: "pending-claim"
+    phone, name, address, zone, role: "customer", status: customerStatus
   }).returning();
 
   if (packageId && dueDate) {

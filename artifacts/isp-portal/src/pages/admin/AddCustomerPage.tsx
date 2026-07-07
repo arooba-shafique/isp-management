@@ -16,6 +16,7 @@ export default function AddCustomerPage() {
   const [zone, setZone] = useState("");
   const [packageId, setPackageId] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [status, setStatus] = useState("pending-claim");
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -23,7 +24,7 @@ export default function AddCustomerPage() {
     setError("");
     if (!phone || !name) { setError("Phone and name are required"); return; }
     try {
-      await create.mutateAsync({ data: { phone, name, address: address || undefined, zone: zone || undefined, packageId: packageId ? Number(packageId) : undefined, dueDate: dueDate || undefined } });
+      await create.mutateAsync({ data: { phone, name, address: address || undefined, zone: zone || undefined, packageId: packageId ? Number(packageId) : undefined, dueDate: dueDate || undefined, status } });
       await qc.invalidateQueries({ queryKey: getListCustomersQueryKey() });
       navigate("/admin/customers");
     } catch (e: unknown) {
@@ -76,8 +77,16 @@ export default function AddCustomerPage() {
               <label className="block text-sm font-medium mb-1.5">Due Date</label>
               <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Status</label>
+              <select value={status} onChange={e => setStatus(e.target.value)} className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <option value="pending-claim">Pending Claim</option>
+                <option value="active">Active</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground">Customer will be created with "Pending Claim" status. They can activate their account by entering OTP and setting a password.</p>
+          <p className="text-xs text-muted-foreground">Customer will be created with the selected status. They can activate their account by entering OTP and setting a password.</p>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <div className="flex gap-2">
             <button type="submit" disabled={create.isPending} className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">

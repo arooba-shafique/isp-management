@@ -13,4 +13,5 @@ export interface CustomerInput {
   zone?: string;
   packageId?: number;
   dueDate?: string;
+  status?: string;
 }

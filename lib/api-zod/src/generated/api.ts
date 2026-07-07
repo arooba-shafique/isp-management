@@ -220,7 +220,8 @@ export const CreateCustomerBody = zod.object({
   "address": zod.string().optional(),
   "zone": zod.string().optional(),
   "packageId": zod.number().optional(),
-  "dueDate": zod.string().optional()
+  "dueDate": zod.string().optional(),
+  "status": zod.string().optional()
 })
 
 
