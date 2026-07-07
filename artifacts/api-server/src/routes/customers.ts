@@ -118,10 +118,11 @@ router.post("/customers", requireAdmin, async (req, res): Promise<void> => {
     phone, name, address, zone, role: "customer", status: customerStatus
   }).returning();
 
-  if (packageId && dueDate) {
+  if (packageId) {
+    const endDate = dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
     await db.insert(subscriptionsTable).values({
       customerId: user.id, packageId: Number(packageId), status: "active",
-      startDate: new Date().toISOString().split("T")[0], endDate: dueDate
+      startDate: new Date().toISOString().split("T")[0], endDate
     });
   }
 
