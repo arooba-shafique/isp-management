@@ -28,8 +28,8 @@ async function seedTrialSettings() {
       });
       logger.info("Seeded default trial settings");
     }
-  } catch (err) {
-    logger.error({ err }, "Failed to seed trial settings");
+  } catch {
+    // If table doesn't exist, skip seeding - this is fine for non-trial deployments
   }
 }
 

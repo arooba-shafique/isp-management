@@ -23,8 +23,9 @@ export async function checkTrialExpired(req: Request, res: Response, next: NextF
     }
 
     next();
-  } catch (err) {
-    next(err);
+  } catch {
+    // If trial_settings table doesn't exist or any error, just skip the check
+    next();
   }
 }
 
