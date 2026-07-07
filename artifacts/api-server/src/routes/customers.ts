@@ -58,9 +58,12 @@ router.post("/customers/import", requireAdmin, async (req, res): Promise<void> =
     if (existing) { skipped++; continue; }
 
     try {
+      // Default password: 123456
+      const defaultPasswordHash = "$2b$10$T2kkuIX408ikxqMYCkHRwuAPc6t9QzJiQ5NO8ZB9Ntl4XpdAnT2iC";
+      
       const [newUser] = await db.insert(usersTable).values({
         phone: row.phone, name: row.name, address: row.address ?? null,
-        zone: row.zone ?? null, role: "customer", status: "pending-claim",
+        zone: row.zone ?? null, role: "customer", status: "active", passwordHash: defaultPasswordHash,
       }).returning();
 
       if (row.packageName && row.dueDate) {
@@ -112,10 +115,13 @@ router.post("/customers", requireAdmin, async (req, res): Promise<void> => {
   if (existing) { res.status(409).json({ error: "Phone already registered" }); return; }
 
   const validStatuses = ["active", "suspended", "pending-claim"];
-  const customerStatus = validStatuses.includes(status) ? status : "pending-claim";
+  const customerStatus = validStatuses.includes(status) ? status : "active";
+
+  // Default password: 123456
+  const defaultPasswordHash = "$2b$10$T2kkuIX408ikxqMYCkHRwuAPc6t9QzJiQ5NO8ZB9Ntl4XpdAnT2iC";
 
   const [user] = await db.insert(usersTable).values({
-    phone, name, address, zone, role: "customer", status: customerStatus
+    phone, name, address, zone, role: "customer", status: customerStatus, passwordHash: defaultPasswordHash
   }).returning();
 
   if (packageId) {
