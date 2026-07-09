@@ -24,8 +24,8 @@ const PAYMENT_METHODS = [
     color: "text-green-600",
     bg: "bg-green-50 border-green-200",
     activeBg: "bg-green-100 border-green-500",
-    account: "0301-0000000",
-    accountLabel: "Mobile Account",
+    account: "0329-6934405",
+    accountLabel: "Mobile Account (Mehtab Rasool)",
   },
   {
     id: "bank",
@@ -34,8 +34,8 @@ const PAYMENT_METHODS = [
     color: "text-blue-600",
     bg: "bg-blue-50 border-blue-200",
     activeBg: "bg-blue-100 border-blue-500",
-    account: "PK00 HABB 0000 0000 0000 0000",
-    accountLabel: "HBL Account",
+    account: "PK85 FAYS 3502 3010 0000 4402",
+    accountLabel: "Faysal Bank Account (MEHTAB RASOOL)",
   },
 ];
 
