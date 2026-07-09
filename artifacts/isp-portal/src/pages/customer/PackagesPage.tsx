@@ -24,7 +24,7 @@ const PAYMENT_METHODS = [
     color: "text-green-600",
     bg: "bg-green-50 border-green-200",
     activeBg: "bg-green-100 border-green-500",
-    account: "0329-6934405",
+    account: "0329-6934055",
     accountLabel: "Mobile Account (Mehtab Rasool)",
   },
   {
