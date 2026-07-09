@@ -8,16 +8,6 @@ import { useState } from "react";
 
 const PAYMENT_METHODS = [
   {
-    id: "jazzcash",
-    label: "JazzCash",
-    icon: Smartphone,
-    color: "text-red-600",
-    bg: "bg-red-50 border-red-200",
-    activeBg: "bg-red-100 border-red-500",
-    account: "0300-0000000",
-    accountLabel: "Mobile Account",
-  },
-  {
     id: "easypaisa",
     label: "EasyPaisa",
     icon: Smartphone,
@@ -50,7 +40,7 @@ export default function CustomerPackages() {
   const submitPayment = useSubmitPayment();
 
   const [dialogPkg, setDialogPkg] = useState<Pkg | null>(null);
-  const [payMethod, setPayMethod] = useState("jazzcash");
+  const [payMethod, setPayMethod] = useState("easypaisa");
   const [amount, setAmount] = useState("");
   const [transactionId, setTransactionId] = useState("");
   const [proofUrl, setProofUrl] = useState("");
@@ -66,7 +56,7 @@ export default function CustomerPackages() {
 
   function openDialog(pkg: Pkg) {
     setDialogPkg(pkg);
-    setPayMethod("jazzcash");
+    setPayMethod("easypaisa");
     setAmount(String(pkg.price));
     setTransactionId("");
     setProofUrl("");
