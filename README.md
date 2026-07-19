@@ -83,12 +83,6 @@ isp-management/
    pnpm --filter @workspace/api-server run dev
    ```
 
-## API Commands
+## Live Demo
 
-| Command | Description |
-|---------|-------------|
-| `pnpm --filter @workspace/api-server run dev` | Run API server (port 8080) |
-| `pnpm run typecheck` | Full typecheck across all packages |
-| `pnpm run build` | Typecheck + build all packages |
-| `pnpm --filter @workspace/api-spec run codegen` | Regenerate API hooks from OpenAPI spec |
-| `pnpm --filter @workspace/db run push` | Push DB schema changes (dev only) |
+[isp-management-api-server.vercel.app](https://isp-management-api-server.vercel.app)
