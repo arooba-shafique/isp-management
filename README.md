@@ -1,6 +1,6 @@
 # NetLink ISP Management Portal
 
-A full-stack ISP management web application for **NetLink ISP (Sahiwal, Pakistan)** serving 200+ customers. Features separate admin and customer portals with phone-based OTP authentication.
+A full-stack ISP management web application for **NetLink ISP (Sahiwal, Pakistan)** serving 200+ customers. Features separate admin and customer portals with password-based authentication.
 
 ## Features
 
@@ -19,11 +19,6 @@ A full-stack ISP management web application for **NetLink ISP (Sahiwal, Pakistan
 - Submit payment proofs
 - File complaints/support tickets
 
-### Auth Flow
-- Phone-only authentication via OTP (no passwords required for login)
-- Auto-register for new users or login for existing users
-- Admin-imported users go through "claim account" flow to set password
-
 ## Tech Stack
 
 | Layer | Technology |
@@ -32,7 +27,7 @@ A full-stack ISP management web application for **NetLink ISP (Sahiwal, Pakistan
 | Backend | Express 5, Node.js |
 | Database | PostgreSQL, Drizzle ORM |
 | Validation | Zod |
-| Auth | JWT (Bearer tokens) |
+| Auth | JWT (Bearer tokens), bcrypt password hashing |
 | Charts | Recharts |
 
 ## Project Structure
@@ -88,12 +83,6 @@ isp-management/
    pnpm --filter @workspace/api-server run dev
    ```
 
-## Test Data
-
-- **Admin**: phone `03000000000`, OTP login (any OTP returned by the send-otp endpoint)
-- **5 Packages**: Basic 3Mbps (Rs.1200), Standard 10Mbps (Rs.2000), Pro 20Mbps (Rs.3000), Business 50Mbps (Rs.7500), Economy 2Mbps Quarterly (Rs.3000)
-- **3 Sample Customers**: 03001111111, 03002222222, 03003333333
-
 ## API Commands
 
 | Command | Description |
@@ -103,7 +92,3 @@ isp-management/
 | `pnpm run build` | Typecheck + build all packages |
 | `pnpm --filter @workspace/api-spec run codegen` | Regenerate API hooks from OpenAPI spec |
 | `pnpm --filter @workspace/db run push` | Push DB schema changes (dev only) |
-
-## License
-
-MIT
